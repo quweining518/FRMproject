@@ -1,0 +1,16 @@
+{
+"use_history": 0,
+"datastart": "2002-01-01",
+"dataend": "2022-11-20",
+"portfolio_type": 1,
+"total_position": 10000,
+"option_weight": 0,
+"stock_config": {
+		"tickers": ["BA", "NOC"],
+		"weight": "equal",
+		"custom_weight": [0.4, 0.6]},
+"option_config": {
+		"tickers": [],
+		"option_type": "put",
+		"moneyness": 1.0}
+}
