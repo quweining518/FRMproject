@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import warnings
 warnings.filterwarnings("ignore")
+import os
 
 def param_var(x, T, p, mu, vol):
     var = x - x*np.exp(vol*np.sqrt(T)*norm.ppf(1-p) + (mu-vol**2/2)*T)
@@ -90,12 +91,10 @@ def drift_vol(log_rtn, log_rtn_sq, dt, window, lambd, max_win=5000, type='window
     window: int (year)
     lambda: float [0,1]
     type: window | equiv
-
     """
     if type == 'window':
-        samp_mean = log_rtn.rolling(min(max_win, 1/dt * window)).mean()
-        samp_std = np.sqrt(log_rtn_sq.rolling(min(max_win, 1/dt * window)).mean() - samp_mean ** 2)
-
+        samp_mean = log_rtn.rolling(min(max_win, int(1/dt) * window)).mean()
+        samp_std = np.sqrt(log_rtn_sq.rolling(min(max_win, int(1/dt) * window)).mean() - samp_mean ** 2)
     else:
         expo = np.array([np.power(lambd, i) for i in range(max_win)])
         samp_mean = log_rtn.rolling(min_periods=1, window=max_win).apply(
@@ -108,14 +107,15 @@ def drift_vol(log_rtn, log_rtn_sq, dt, window, lambd, max_win=5000, type='window
     return drift, volatility
 
 def plot_output(res, title, filename, figsize = (10,6)):
+    print(os.getcwd())
     plt.figure(figsize=figsize)
     labels = list(res.columns)
-    for col in range(len(res.shape[1])):
+    for col in range(res.shape[1]):
         plt.plot(res.iloc[:,col], label = labels[col])
     plt.title(title)
     plt.xlabel("range of time (t)")
     plt.ylabel("VaR/ES ($)")
     plt.legend()
     plt.grid()
-    plt.savefig(r'../output/figure/%s' % filename, format = 'png')
+    plt.savefig(r"./output/figure/%s.png" % filename, format = 'png')
     plt.show()

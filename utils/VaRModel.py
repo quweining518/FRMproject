@@ -12,9 +12,9 @@ class varmodel(object):
 
     def __init__(self, params):
         risk_config = params['risk_config']
-        self.horizon = risk_config['horizon']/risk_config['tradedays']
-        self.start = datetime.strptime(risk_config["start"])
-        self.end = datetime.strptime(risk_config["end"])
+        self.horizon = risk_config['horizon']/params['tradedays']
+        self.start = datetime.strptime(risk_config["start"], "%Y-%m-%d")
+        self.end = datetime.strptime(risk_config["end"], "%Y-%m-%d")
         self.pvar = risk_config["var_percentile"]
         self.pes = risk_config["es_percentile"]
         self.calib_win = params["calib_window"]
@@ -23,7 +23,7 @@ class varmodel(object):
         self.params = params
         self.plot_figure = params["plot_figure"]
         self.save_output = params["save_output"]
-        self.dt = 1/risk_config['tradedays']
+        self.dt = 1/params['tradedays']
 
         # result initialization
         self.calib_params = dict()
@@ -48,6 +48,7 @@ class varmodel(object):
             else:
                 df_drift, df_vol = drift_vol(stock_handle.iloc[:,N+i], stock_handle.iloc[:,2*N+i],
                                              dt, 0, lambd, type='equiv')
+            print(df_drift.head())
             res_all['drift'].append(df_drift)
             res_all['volatility'].append(df_vol)
         if self.calib_weight == 1:
@@ -61,6 +62,7 @@ class varmodel(object):
 
         res_all['drift'] = pd.concat(res_all['drift'], axis=1)
         res_all['volatility'] = pd.concat(res_all['volatility'], axis = 1)
+        print(res_all['drift'].head())
         self.calib_params = res_all
 
 
@@ -69,15 +71,16 @@ class varmodel(object):
         V_0 = data_params["total_position"]
         assumption = self.params["param_config"]["assumption"]
         startdate = self.start
+        enddate = self.end
 
         res_all = pd.DataFrame(columns=['param_VaR', 'param_ES'])
         if assumption == "gbm":
             res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
-                                       self.calib_params["drift"].loc[startdate, "portfolio"],
-                                       self.calib_params["volatility"].loc[startdate, "portfolio"])
+                                       self.calib_params["drift"].loc[startdate:enddate, "portfolio"],
+                                       self.calib_params["volatility"].loc[startdate:enddate, "portfolio"])
             res_all["param_ES"] = param_es(V_0, self.horizon, self.pes,
-                                       self.calib_params["drift"].loc[startdate, "portfolio"],
-                                       self.calib_params["volatility"].loc[startdate, "portfolio"])
+                                       self.calib_params["drift"].loc[startdate:enddate, "portfolio"],
+                                       self.calib_params["volatility"].loc[startdate:enddate, "portfolio"])
         else:
             N = len(self.tickers)
             P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
@@ -95,7 +98,7 @@ class varmodel(object):
             plot_output(res_all, "Parametric VaR and ES", 'parametric_all')
 
         if self.save_output:
-            with pd.ExcelWriter("../output/result_parametric.xlsx", date_format="YYYY-MM-DD") as writer:
+            with pd.ExcelWriter(r"./output/result_parametric.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.to_excel(writer)
 
         return res_all

@@ -34,15 +34,14 @@ portfolio_type choices:
 def setup(params):
     tk_all = [params['stock_config']['tickers'], params['option_config']['tickers']]
     startstr = params['datastart']
-    print(startstr)
     endstr = params['dataend']
-    print(endstr)
 
     # load data
-    data = load_data(tk_all, startstr, endstr, params['use_history'])
+    data = load_data( tk_all, startstr, endstr, params['use_history'])
     stocks = data[0]
     options = data[1:]
     stock_use, pf_use = stock_handle(stocks, params)
+    option_use = None
     # options_use = option_handle(options, params)
     return stock_use, pf_use, option_use
 
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     # Setup portfolio and import data (.data/data_config.py and upload data files if using historical data)
     data_params = load_config("data")
     check_data_config(data_params)
-
+    # a = yf.download(['BA', 'NOC', 'PFE', 'AAPL'], start='2002-01-01', end='2022-11-30')
     if data_params["portfolio_type"] in [1,2,3]:
         stock_use, pf_use = setup(data_params)[:2]
     else:
@@ -65,12 +64,14 @@ if __name__ == '__main__':
     system = Model.varmodel(sys_params)
 
     num_stock = len(data_params['stock_config']['tickers'])
+    print(num_stock)
     if sys_params['param_model'] or sys_params['mc_model']:
         system.param_calibration(num_stock, stock_use, pf_use)
         calibrated = True
-    if sys_params['param_model']:
+        print("Calibration is done.")
+    if sys_params['param_model'] and calibrated:
         param_result = system.cal_param_var(data_params)
-    # if params['mc_model']:
+    # if params['mc_model'] and calibrated:
     #     mc_var, mc_es = use_montecarlo()
     # if params['hist_model']:
     #     hist_var, hist_es = use_historical()

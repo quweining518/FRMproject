@@ -44,7 +44,7 @@ def load_config(config):
         name = r"./data/param_config.json"
     with open(name) as config_file:
         config = json.load(config_file)
-    print(config)
+    # print(config)
     return config
 
 def check_data_config(config):
@@ -96,7 +96,7 @@ def check_data_config(config):
 def check_param_config(config):
     if not isinstance(config, dict):
         raise TypeError("Configuration file should be a dict.")
-    if not isinstance(config["risk_config"]["horizon"], int) or config["risk_config"]<= 0:
+    if not isinstance(config["risk_config"]["horizon"], int) or config["risk_config"]["horizon"]<= 0:
         raise ValueError("Illegal input type or value.")
     if not isinstance(config["risk_config"]["start"], str):
         raise TypeError("'start' field should be a string of format 'yyyy-mm-dd'.")
@@ -160,13 +160,14 @@ def load_data(tickers=None, startdate=None, enddate=None, use_history = False):
         if len(tk_stock) > 0:
             print('Fetching stocks: %s ' % tk_stock)
             all_stock = yf.download(tk_stock, start = startdate, end = enddate)
-            print(all_stock)
-            # if all_stock.isnull().all().values:
+            # print(all_stock.head())
+            # if all_stock:
             #     print("Failed to fetch stock data.")
             #     df_stock = None
             # else:
-            #     df_stock = all_stock['Adj Close']
-            df_stock = pd.DataFrame(all_stock.iloc[:,:len(tk_stock)], columns= tk_stock)
+            df_stock = pd.DataFrame(all_stock.iloc[:,:len(tk_stock)].values,
+                                    index = all_stock.index, columns= tk_stock)
+            # print(df_stock.head())
         else:
             df_stock = None
 
@@ -195,11 +196,10 @@ def load_data(tickers=None, startdate=None, enddate=None, use_history = False):
 
     return [df_stock, df_call, df_put]
 
-def stock_handle(data, params):
+def stock_handle(df_price, params):
     log_return = lambda x: np.log(x/x.shift(1))
     log_return_sq = lambda ret: np.power(ret, 2)
 
-    df_price = data[0]
     df_ret = df_price.apply(log_return)
     df_ret_sq = df_ret.apply(log_return_sq)
     if params['stock_config']['weight'] == 'equal':
