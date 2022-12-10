@@ -37,7 +37,7 @@ def setup(params):
     endstr = params['dataend']
 
     # load data
-    data = load_data( tk_all, startstr, endstr, params['use_history'])
+    data = load_data(tk_all, startstr, endstr, params['use_history'])
     stocks = data[0]
     options = data[1:]
     stock_use, pf_use = stock_handle(stocks, params)
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         print("Calibration is done.")
     if sys_params['param_model'] and calibrated:
         param_result = system.cal_param_var(data_params)
-    # if params['mc_model'] and calibrated:
+    # if sys_params['mc_model'] and calibrated:
     #     mc_var, mc_es = use_montecarlo()
-    # if params['hist_model']:
-    #     hist_var, hist_es = use_historical()
+    if sys_params['hist_model']:
+        hist_result = system.cal_hist_var(data_params, pf_use['log_rtn'])

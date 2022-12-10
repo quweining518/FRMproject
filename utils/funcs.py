@@ -22,17 +22,17 @@ def es_short(x, T, p, mu, vol):
 def var_short(x, T, p, mu, vol):
     return - param_var(x, T, 1-p, mu, vol)
 
-def historical_var(df, notional, p, window):
-    df1 = df.rolling(window*252).apply(lambda x: np.percentile(x, 100*(1-p)))
+def historical_var(df, notional, p, dt, window):
+    df1 = df.rolling(window*int(1/dt)).apply(lambda x: np.percentile(x, 100*(1-p)))
     return - notional * df1
 
-def historical_es(df, notional, p, window):
+def historical_es(df, notional, p, dt, window):
     def cal_es(x):
         threshold = np.percentile(x, 100*(1-p))
         tail = x[x <= threshold]
         es = np.mean(tail)
         return es
-    df1 = df.rolling(window*252).apply(lambda x: cal_es(x))
+    df1 = df.rolling(window*int(1/dt)).apply(lambda x: cal_es(x))
     return - notional * df1
 
 
@@ -107,7 +107,6 @@ def drift_vol(log_rtn, log_rtn_sq, dt, window, lambd, max_win=5000, type='window
     return drift, volatility
 
 def plot_output(res, title, filename, figsize = (10,6)):
-    print(os.getcwd())
     plt.figure(figsize=figsize)
     labels = list(res.columns)
     for col in range(res.shape[1]):

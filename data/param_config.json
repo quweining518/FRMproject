@@ -1,8 +1,8 @@
 {
 "risk_config": {
 		"horizon": 5, 
-		"start": "2022-01-03",
-		"end": "2022-11-30",
+		"start": "2010-01-03",
+		"end": "2022-08-30",
 		"var_percentile": 0.99,
 		"es_percentile": 0.975},
 "tradedays": 252,
@@ -17,5 +17,5 @@
 "mc_model": 1,
 "mc_config": {"n_paths": 10000,
 		"assumption": "gbm"},
-"plot_figure": 0,
+"plot_figure": 1,
 "save_output": 1}

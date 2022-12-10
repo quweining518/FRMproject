@@ -93,9 +93,27 @@ class varmodel(object):
         if self.plot_figure:
             # plot VaR
             plot_output(res_all, "Parametric VaR and ES", 'parametric_all')
-
         if self.save_output:
             with pd.ExcelWriter(r"./output/result_parametric.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.to_excel(writer)
+
+        return res_all
+
+    def cal_hist_var(self, data_params, pf_log_rtn):
+        V_0 = data_params["total_position"]
+        startdate = self.start
+        enddate = self.end
+
+        res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
+        res_all["hist_VaR"] = historical_var(pf_log_rtn, V_0, self.pvar, self.dt, self.calib_win)
+        res_all["hist_ES"] = historical_es(pf_log_rtn, V_0, self.pes, self.dt, self.calib_win)
+        self.hist_result = res_all.loc[startdate:enddate,:]
+
+        if self.plot_figure:
+            # plot VaR
+            plot_output(res_all.loc[startdate:enddate,:], "Historical VaR and ES", 'historical_all')
+        if self.save_output:
+            with pd.ExcelWriter(r"./output/result_historical.xlsx", date_format="YYYY-MM-DD") as writer:
+                res_all.loc[startdate:enddate,:].to_excel(writer)
 
         return res_all

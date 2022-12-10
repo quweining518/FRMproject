@@ -7,26 +7,30 @@ import json
 import yfinance as yf # https://github.com/ranaroussi/yfinance
 
 def load_file():
-    path = r'./data'
+    path = r'./data/'
     df_stock = None
     df_option = None
     for f in os.listdir(path):
         if f.split('.')[0] == 'data_stock':
             if f.split('.')[1] == 'csv':
-                df_stock = pd.read_csv(f, index_col = 0, parse_dates = True)
+                df_stock = pd.read_csv(path+f, index_col = 0, parse_dates = True)
             elif f.split('.')[1] == 'xlsx':
-                df_stock = pd.read_excel(f, index_col = 0, parse_dates = True)
+                df_stock = pd.read_excel(path+f, index_col = 0, parse_dates = True)
             elif f.split('.')[1] == 'txt':
-                df_stock = pd.read_table(f, index_col = 0, parse_dates = True)
+                df_stock = pd.read_table(path+f, index_col = 0, parse_dates = True)
             else:
                 raise TypeError("Acceptable types of file are 'csv', 'xlsx' and 'txt' only.")
+
+            if df_stock.index[0] > df_stock.index[-1]:
+                df_stock = df_stock[::-1] # reverse datetime to be chronological order
+
         elif f.split('.')[0] == 'data_option':
             if f.split('.')[1] == 'csv':
-                df_option = pd.read_csv(f, index_col = 0, parse_dates = True)
+                df_option = pd.read_csv(path+f, index_col = 0, parse_dates = True)
             elif f.split('.')[1] == 'xlsx':
-                df_option = pd.read_excel(f, index_col = 0, parse_dates = True)
+                df_option = pd.read_excel(path+f, index_col = 0, parse_dates = True)
             elif f.split('.')[1] == 'txt':
-                df_option = pd.read_table(f, index_col = 0, parse_dates = True)
+                df_option = pd.read_table(path+f, index_col = 0, parse_dates = True)
             else:
                 raise TypeError("Acceptable types of file are 'csv', 'xlsx' and 'txt' only.")
 
@@ -160,14 +164,8 @@ def load_data(tickers=None, startdate=None, enddate=None, use_history = False):
         if len(tk_stock) > 0:
             print('Fetching stocks: %s ' % tk_stock)
             all_stock = yf.download(tk_stock, start = startdate, end = enddate)
-            # print(all_stock.head())
-            # if all_stock:
-            #     print("Failed to fetch stock data.")
-            #     df_stock = None
-            # else:
             df_stock = pd.DataFrame(all_stock.iloc[:,:len(tk_stock)].values,
                                     index = all_stock.index, columns= tk_stock)
-            # print(df_stock.head())
         else:
             df_stock = None
 

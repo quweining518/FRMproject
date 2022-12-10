@@ -6,9 +6,9 @@
 "total_position": 10000,
 "option_weight": 0,
 "stock_config": {
-		"tickers": ["BA", "NOC", "PFE", "JNJ"],
+		"tickers": ["BA", "NOC"],
 		"weight": "equal",
-		"custom_weight": [0.2, 0.3, 0.2, 0.3]},
+		"custom_weight": [0.5,0.5]},
 "option_config": {
 		"tickers": [],
 		"option_type": "put",
