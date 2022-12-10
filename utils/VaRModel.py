@@ -39,7 +39,8 @@ class varmodel(object):
         length = self.calib_win
         lambd = self.calib_lambda
         dt = self.dt
-        res_all = dict.fromkeys(['drift', 'volatility'], [])
+        all_drift = pd.DataFrame(columns = tickers)
+        all_volatility = pd.DataFrame(columns = tickers)
         for i in range(N):
             print(tickers[i])
             if self.calib_weight == 1:
@@ -48,26 +49,22 @@ class varmodel(object):
             else:
                 df_drift, df_vol = drift_vol(stock_handle.iloc[:,N+i], stock_handle.iloc[:,2*N+i],
                                              dt, 0, lambd, type='equiv')
-            print(df_drift.head())
-            res_all['drift'].append(df_drift)
-            res_all['volatility'].append(df_vol)
+            all_drift[tickers[i]] = df_drift
+            all_volatility[tickers[i]] = df_vol
+
         if self.calib_weight == 1:
             df_drift, df_vol = drift_vol(pf_handle['log_rtn'], pf_handle['log_rtn_sq'],
                                          dt, length, 0, type='window')
         elif self.calib_weight == 2:
             df_drift, df_vol = drift_vol(pf_handle['log_rtn'], pf_handle['log_rtn_sq'],
                                          dt, 0, lambd, type='equiv')
-        res_all['drift'].append(pd.DataFrame(df_drift, columns=['portfolio']))
-        res_all['volatility'].append(pd.DataFrame(df_vol, columns=['portfolio']))
-
-        res_all['drift'] = pd.concat(res_all['drift'], axis=1)
-        res_all['volatility'] = pd.concat(res_all['volatility'], axis = 1)
-        print(res_all['drift'].head())
-        self.calib_params = res_all
+        all_drift["portfolio"] = df_drift
+        all_volatility["portfolio"] = df_vol
+        self.calib_drift = all_drift
+        self.calib_vol = all_volatility
 
 
     def cal_param_var(self, data_params):
-
         V_0 = data_params["total_position"]
         assumption = self.params["param_config"]["assumption"]
         startdate = self.start
@@ -76,11 +73,11 @@ class varmodel(object):
         res_all = pd.DataFrame(columns=['param_VaR', 'param_ES'])
         if assumption == "gbm":
             res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
-                                       self.calib_params["drift"].loc[startdate:enddate, "portfolio"],
-                                       self.calib_params["volatility"].loc[startdate:enddate, "portfolio"])
+                                       self.calib_drift.loc[startdate:enddate, "portfolio"],
+                                       self.calib_vol.loc[startdate:enddate, "portfolio"])
             res_all["param_ES"] = param_es(V_0, self.horizon, self.pes,
-                                       self.calib_params["drift"].loc[startdate:enddate, "portfolio"],
-                                       self.calib_params["volatility"].loc[startdate:enddate, "portfolio"])
+                                       self.calib_drift.loc[startdate:enddate, "portfolio"],
+                                       self.calib_vol.loc[startdate:enddate, "portfolio"])
         else:
             N = len(self.tickers)
             P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
