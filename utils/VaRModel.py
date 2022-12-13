@@ -32,44 +32,33 @@ class varmodel(object):
         self.mc_result = dict()
 
     def param_calibration(self, N, stock_handle, pf_handle):
-
         tickers = list(stock_handle.columns)[:N]
         self.tickers = tickers
         self.stock_handle = stock_handle
-        length = self.calib_win
-        lambd = self.calib_lambda
-        dt = self.dt
+        length, lambd, dt = self.calib_win, self.calib_lambda, self.dt
         all_drift = pd.DataFrame(columns = tickers)
         all_volatility = pd.DataFrame(columns = tickers)
         for i in range(N):
-            print(tickers[i])
             if self.calib_weight == 1:
                 df_drift, df_vol = drift_vol(stock_handle.iloc[:,N+i], stock_handle.iloc[:,2*N+i],
                                              dt, length, 0, type='window')
             else:
                 df_drift, df_vol = drift_vol(stock_handle.iloc[:,N+i], stock_handle.iloc[:,2*N+i],
                                              dt, 0, lambd, type='equiv')
-            all_drift[tickers[i]] = df_drift
-            all_volatility[tickers[i]] = df_vol
-
+            all_drift[tickers[i]], all_volatility[tickers[i]] = df_drift, df_vol
         if self.calib_weight == 1:
             df_drift, df_vol = drift_vol(pf_handle['log_rtn'], pf_handle['log_rtn_sq'],
                                          dt, length, 0, type='window')
         elif self.calib_weight == 2:
             df_drift, df_vol = drift_vol(pf_handle['log_rtn'], pf_handle['log_rtn_sq'],
                                          dt, 0, lambd, type='equiv')
-        all_drift["portfolio"] = df_drift
-        all_volatility["portfolio"] = df_vol
-        self.calib_drift = all_drift
-        self.calib_vol = all_volatility
-
+        all_drift["portfolio"], all_volatility["portfolio"] = df_drift, df_vol
+        self.calib_drift, self.calib_vol = all_drift, all_volatility
 
     def cal_param_var(self, data_params):
         V_0 = data_params["total_position"]
         assumption = self.params["param_config"]["assumption"]
-        startdate = self.start
-        enddate = self.end
-
+        startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['param_VaR', 'param_ES'])
         if assumption == "gbm":
             res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
@@ -91,29 +80,58 @@ class varmodel(object):
         self.param_result = res_all
 
         if self.plot_figure:
-            # plot VaR
             plot_output(res_all, "Parametric VaR and ES", 'parametric_all')
         if self.save_output:
             with pd.ExcelWriter(r"./output/result_parametric.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.to_excel(writer)
-
         return res_all
 
     def cal_hist_var(self, data_params, pf_log_rtn):
         V_0 = data_params["total_position"]
-        startdate = self.start
-        enddate = self.end
-
+        startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
         res_all["hist_VaR"] = historical_var(pf_log_rtn, V_0, self.pvar, self.dt, self.calib_win)
         res_all["hist_ES"] = historical_es(pf_log_rtn, V_0, self.pes, self.dt, self.calib_win)
         self.hist_result = res_all.loc[startdate:enddate,:]
 
         if self.plot_figure:
-            # plot VaR
             plot_output(res_all.loc[startdate:enddate,:], "Historical VaR and ES", 'historical_all')
         if self.save_output:
             with pd.ExcelWriter(r"./output/result_historical.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.loc[startdate:enddate,:].to_excel(writer)
-
         return res_all
+
+    def cal_mc_var(self, data_params):
+        V_0 = data_params["total_position"]
+        startdate, enddate = self.start, self.end
+        res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])
+        assumption = self.params["param_config"]["assumption"]
+        n_paths = self.params["mc_config"]["n_paths"]
+        if assumption == "gbm":
+            pf_var = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
+            pf_es = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
+            print(len(pf_var))
+            print(int(self.horizon/self.dt))
+            dateindex = list(self.calib_drift.loc[startdate:enddate,:].index)
+            for i in range(len(pf_var)):
+                pf_var[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_0,
+                                      self.calib_vol.loc[dateindex[i], "portfolio"],
+                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pvar, stat='var')[1]
+                pf_es[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_0,
+                                      self.calib_vol.loc[dateindex[i], "portfolio"],
+                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, stat='es')[1]
+            res_all["mc_VaR"] = pf_var
+            res_all["mc_ES"] = pf_es
+        else:
+            N = len(self.tickers)
+
+        self.param_result = res_all
+
+        if self.plot_figure:
+            plot_output(res_all, "Monte Carlo VaR and ES", 'mc_all')
+        if self.save_output:
+            with pd.ExcelWriter(r"./output/result_montecarlo.xlsx", date_format="YYYY-MM-DD") as writer:
+                res_all.to_excel(writer)
+        return res_all
+
+

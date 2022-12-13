@@ -18,7 +18,6 @@ portfolio_type choices:
 4 - Stocks & Options + Long only
 5 - Stocks & Options + Long short
 
-
 """
 # portfolio_type = 1
 # use_history = False
@@ -71,7 +70,7 @@ if __name__ == '__main__':
         print("Calibration is done.")
     if sys_params['param_model'] and calibrated:
         param_result = system.cal_param_var(data_params)
-    # if sys_params['mc_model'] and calibrated:
-    #     mc_var, mc_es = use_montecarlo()
+    if sys_params['mc_model'] and calibrated:
+        mc_result = system.cal_mc_var(data_params)
     if sys_params['hist_model']:
         hist_result = system.cal_hist_var(data_params, pf_use['log_rtn'])

@@ -35,7 +35,6 @@ def historical_es(df, notional, p, dt, window):
     df1 = df.rolling(window*int(1/dt)).apply(lambda x: cal_es(x))
     return - notional * df1
 
-
 def covariance(df1, df2, window, lambd, max_win=5000, type='window'):
     """calculate covariance between two stocks"""
     if type == 'window':
@@ -60,15 +59,12 @@ def correlation(cov, vol1, vol2, dt):
     corr = cov / (vol1 * vol2 * dt)
     return corr
 
-
-def mc_var_es(dt, T, n_paths, S0, vol, mu, p, stat='var'):
-
+def mc_var_es(dt, T, n_paths, S0, vol, drift, p, stat='var'):
     paths = np.full((T, n_paths), np.nan, dtype=np.float)
     paths[0] = S0
-
     for i in range(T - 1):
         dW = np.sqrt(dt) * np.random.randn(n_paths)
-        paths[i + 1] = paths[i] * np.exp((mu - 1 / 2 * vol ** 2) * dt + vol * dW)
+        paths[i + 1] = paths[i] * np.exp((drift - 1 / 2 * vol ** 2) * dt + vol * dW)
 
     pl = S0 - paths[-1]
     if stat == 'var':
@@ -77,7 +73,6 @@ def mc_var_es(dt, T, n_paths, S0, vol, mu, p, stat='var'):
         threshold = np.percentile(pl, 100 * (1 - p))
         tail = pl[pl <= threshold]
         result = - np.mean(tail)
-
     return pl, result
 
 def rolling_weights(x, expo):
