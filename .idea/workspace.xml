@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="c33cb379-8505-4b42-a378-c3da5a54295b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/figure/parametric_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/parametric_all.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/result_parametric.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_parametric.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/system.py" beforeDir="false" afterPath="$PROJECT_DIR$/system.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/VaRModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/VaRModel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/funcs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/funcs.py" afterDir="false" />
-    </list>
+    <list default="true" id="c33cb379-8505-4b42-a378-c3da5a54295b" name="Default Changelist" comment="add new file. nothing yet" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,14 +17,43 @@
       </list>
     </option>
   </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="origin/main" />
+  </component>
   <component name="Git.Settings">
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="7992bd3b-ef49-4399-bd84-703dc9da2254" />
+        <option name="url" value="https://github.com/quweining518/FRMproject.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="ProjectId" id="2IPtU4jKm2DaM0ACwHSD11t6m4y" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
@@ -43,11 +68,19 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="system" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -85,28 +118,20 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
-  <component name="WindowStateProjectService">
-    <state x="389" y="0" key="#system" timestamp="1670540741078">
-      <screen x="0" y="0" width="1280" height="689" />
-    </state>
-    <state x="389" y="0" key="#system/0.0.1280.689@0.0.1280.689" timestamp="1670540741078" />
-    <state x="93" y="93" width="1095" height="504" key="DiffContextDialog" timestamp="1670540715712">
-      <screen x="0" y="0" width="1280" height="689" />
-    </state>
-    <state x="93" y="93" width="1095" height="504" key="DiffContextDialog/0.0.1280.689@0.0.1280.689" timestamp="1670540715712" />
-    <state x="157" y="0" key="SettingsEditor" timestamp="1670096256600">
-      <screen x="0" y="0" width="1280" height="689" />
-    </state>
-    <state x="157" y="0" key="SettingsEditor/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1670096256600" />
-    <state x="351" y="169" key="com.intellij.ide.util.TipDialog" timestamp="1670964426895">
-      <screen x="0" y="0" width="1280" height="689" />
-    </state>
-    <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1670628830141" />
-    <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689@0.0.1280.689" timestamp="1670964426895" />
-    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup" timestamp="1670707153230">
-      <screen x="0" y="0" width="1280" height="689" />
-    </state>
-    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1670096956310" />
-    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689@0.0.1280.689" timestamp="1670707153230" />
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/backtest.py</url>
+          <line>20</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/backtest.py</url>
+          <line>16</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
