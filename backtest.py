@@ -7,8 +7,70 @@ from scipy.stats import norm
 from utils.preprocess import *
 from utils.funcs import *
 import utils.VaRModel as Model
+from system import *
+import os
 import warnings
 warnings.filterwarnings("ignore")
+
+
+class BacktestCreator(object):
+    def __init__(self, bt_name, hist_data, var_data):
+        func = lambda x: datetime.utcfromtimestamp(x.tolist() / 1e9).date()
+        self.index = [func(x) for x in var_data.index.values]
+        self.bt_name = bt_name
+        self.hist_data = hist_data.filter(items = var_data.index.to_list(), axis = 0).log_rtn
+        self.var_data = var_data.param_VaR
+        curr_time = datetime.now()
+        curr_time = curr_time.strftime('%Y%m%d_%H%M')
+        self.path = os.path.join('./backtest', bt_name + "_" + curr_time)
+        os.makedirs(os.path.join('./backtest', bt_name + "_" + curr_time))
+        len(self.hist_data)
+
+    def get_risk_params(self):
+        risk_params = {}
+        risk_config = sys_params['risk_config']
+        self.horizon = risk_config['horizon']
+        risk_params['Horizon (days)'] = self.horizon
+        risk_params['Start Date'] = datetime.strptime(risk_config["start"], "%Y-%m-%d")
+        risk_params['Dnd Date'] = datetime.strptime(risk_config["end"], "%Y-%m-%d")
+        risk_params['VaR Percentile'] = risk_config["var_percentile"]
+        risk_params['ES Percentile'] = risk_config["es_percentile"]
+        risk_params['Calibration Window'] = sys_params["calib_window"]
+        risk_params['Lambda (Exponentially Weighted'] = sys_params["calib_lambda"]
+        risk_params['Data Weighting'] = 'Unweighted' if sys_params["calib_weighting"] == "unweighting" else 'Exponentially Weighted'
+        risk_params['Portfolio Components'] = data_params['stock_config']['tickers']
+        risk_params['Portfolio Weighting Method'] = data_params['stock_config']['weight']
+        risk_params['Portfolio Weights'] = data_params['stock_config']['custom_weight']
+        return risk_params
+
+
+    def get_exceptions(self):
+        hist_data = self.hist_data
+        var_data = self.var_data
+        count = []
+        for i in range(len(var_data)):
+            temp_hist = hist_data[i:i + 252].values.flatten()
+            temp_var = var_data[i:i + 252].values.flatten()
+            count_i = len([1 for i, j in zip(temp_hist, temp_var) if -i > j])
+            count.append(count_i)
+        return count
+
+    def plot_exceptions(self, count):
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.plot(self.index, count, lw=1, label="# of exceptions")
+        ax.set_ylabel("# of counts")
+        ax2 = ax.twinx()
+        ax2.plot(self.index, self.hist_data.values.flatten(), lw=1, label= str(self.horizon) + ' day change in portfolio value', color='green')
+        ax2.plot(self.index, self.var_data.values.flatten(), lw=1, label='VaR', color='black')
+        ax2.set_ylabel("Value")
+        title = self.bt_name∂
+        ax.set_title(title)
+        ax.legend(loc = 2)
+        ax2.legend(loc = 1)
+        plt.savefig(os.path.join(self.path, 'exceptions.png'))
+
+
+
 
 """
 portfolio_type choices:
@@ -30,22 +92,6 @@ portfolio_type choices:
 # horizon = 5  # int (unit: day), default: 5 (5-day VaR/ES)
 # percentile = 0.99  # float (range (0,1)): percentile of
 #
-def setup(params):
-    tk_all = [params['stock_config']['tickers'], params['option_config']['tickers']]
-    startstr = params['datastart']
-    endstr = params['dataend']
-
-    # load data
-    data = load_data(tk_all, startstr, endstr, params['use_history'])
-    stocks = data[0]
-    options = data[1:]
-    stock_use, pf_use = stock_handle(stocks, params)
-    option_use = None
-    # options_use = option_handle(options, params)
-    return stock_use, pf_use, option_use
-
-
-
 
 if __name__ == '__main__':
     # Setup portfolio and import data (.data/data_config.py and upload data files if using historical data)
@@ -74,3 +120,8 @@ if __name__ == '__main__':
         mc_result = system.cal_mc_var(data_params)
     if sys_params['hist_model']:
         hist_result = system.cal_hist_var(data_params, pf_use['log_rtn'])
+
+    backtest = BacktestCreator('test', pf_use, param_result)
+    backtest.get_risk_params()
+    count = backtest.get_exceptions()
+    backtest.plot_exceptions(count)
