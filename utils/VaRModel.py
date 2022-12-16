@@ -10,21 +10,25 @@ import pandas as pd
 class varmodel(object):
     version = '1.0'
 
-    def __init__(self, params):
-        risk_config = params['risk_config']
-        self.horizon = risk_config['horizon']/params['tradedays']
+    def __init__(self, data_params, sys_params):
+
+        # system parameters initialization
+        risk_config = sys_params['risk_config']
+        self.horizon = risk_config['horizon']/sys_params['tradedays']
         self.start = datetime.strptime(risk_config["start"], "%Y-%m-%d")
         self.end = datetime.strptime(risk_config["end"], "%Y-%m-%d")
         self.pvar = risk_config["var_percentile"]
         self.pes = risk_config["es_percentile"]
-        self.calib_win = params["calib_window"]
-        self.calib_lambda = params["calib_lambda"]
-        self.calib_weight = 1 if params["calib_weighting"] == "unweighting" else 2
-        self.params = params
-        self.plot_figure = params["plot_figure"]
-        self.save_output = params["save_output"]
-        self.dt = 1/params['tradedays']
+        self.calib_win = sys_params["calib_window"]
+        self.calib_lambda = sys_params["calib_lambda"]
+        self.calib_weight = 1 if sys_params["calib_weighting"] == "unweighting" else 2
+        self.params = sys_params
+        self.plot_figure = sys_params["plot_figure"]
+        self.save_output = sys_params["save_output"]
+        self.dt = 1/sys_params['tradedays']
 
+        # portfolio parameters initialization
+        self.V_0 = data_params["total_position"]
         # result initialization
         self.calib_params = dict()
         self.param_result = pd.DataFrame()
@@ -83,7 +87,6 @@ class varmodel(object):
 
 
     def cal_param_var(self, pf_type, data_params):
-        V_0 = data_params["total_position"]
         assumption = self.params["param_config"]["assumption"]
         print("Assumption for parametric model: ", assumption)
         startdate, enddate = self.start, self.end
@@ -91,17 +94,17 @@ class varmodel(object):
 
         if assumption == "gbm":
             if pf_type == 1:
-                res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
+                res_all["param_VaR"] = param_var(self.V_0, self.horizon, self.pvar,
                                            self.calib_drift.loc[startdate:enddate, "portfolio"],
                                            self.calib_vol.loc[startdate:enddate, "portfolio"])
-                res_all["param_ES"] = param_es(V_0, self.horizon, self.pes,
+                res_all["param_ES"] = param_es(self.V_0, self.horizon, self.pes,
                                            self.calib_drift.loc[startdate:enddate, "portfolio"],
                                            self.calib_vol.loc[startdate:enddate, "portfolio"])
             elif pf_type == 2:
-                res_all["param_VaR"] = var_short(V_0, self.horizon, self.pvar,
+                res_all["param_VaR"] = var_short(self.V_0, self.horizon, self.pvar,
                                                  self.calib_drift.loc[startdate:enddate, "portfolio"],
                                                  self.calib_vol.loc[startdate:enddate, "portfolio"])
-                res_all["param_ES"] = es_short(V_0, self.horizon, self.pes,
+                res_all["param_ES"] = es_short(self.V_0, self.horizon, self.pes,
                                                self.calib_drift.loc[startdate:enddate, "portfolio"],
                                                self.calib_vol.loc[startdate:enddate, "portfolio"])
             elif pf_type == 3:
@@ -110,14 +113,13 @@ class varmodel(object):
         else:
             z_var = norm.ppf(self.pvar)
             z_es = norm.ppf(self.pes)
-
             if pf_type == 1:
                 tickers = data_params["stock_config"]["long_tickers"]
                 N = len(tickers)
                 # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
                 weight = [1/N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
-                                    "stock_config"]["long_custom_weight"]
-                V_each = V_0 * np.array(weight)
+                    "stock_config"]["long_custom_weight"]
+                V_each = self.V_0 * np.array(weight)
 
                 cum_evt = 0
                 cum_evt2 = 0
@@ -133,10 +135,9 @@ class varmodel(object):
                         vol_j = self.calib_vol.loc[startdate:enddate, tickers[j]]
                         cum_evt2 += 2*V_each[i]*V_each[j]*np.exp((mu_i + mu_j + corr_ij*vol_j*vol_i) * self.horizon)
                         s += 1
-
                 var_vt = cum_evt2 - cum_evt**2
-                res_all["param_VaR"] = V_0 - (cum_evt - z_var * np.sqrt(var_vt))
-                res_all["param_ES"] = V_0 - (cum_evt - np.sqrt(var_vt)/(1-self.pes) * np.exp(-z_es**2/2)/np.sqrt(2*np.pi))
+                res_all["param_VaR"] = self.V_0 - (cum_evt - z_var * np.sqrt(var_vt))
+                res_all["param_ES"] = self.V_0 - (cum_evt - np.sqrt(var_vt)/(1-self.pes) * np.exp(-z_es**2/2)/np.sqrt(2*np.pi))
 
         self.param_result = res_all
 
@@ -148,11 +149,10 @@ class varmodel(object):
         return res_all
 
     def cal_hist_var(self, pf_type, data_params, pf_log_rtn):
-        V_0 = data_params["total_position"]
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
-        res_all["hist_VaR"] = historical_var(pf_log_rtn, V_0, self.pvar, self.dt, self.calib_win)
-        res_all["hist_ES"] = historical_es(pf_log_rtn, V_0, self.pes, self.dt, self.calib_win)
+        res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
+        res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
         self.hist_result = res_all.loc[startdate:enddate,:]
 
         if self.plot_figure:
@@ -163,30 +163,74 @@ class varmodel(object):
         return res_all
 
     def cal_mc_var(self, pf_type, data_params):
-        V_0 = data_params["total_position"]
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])
         assumption = self.params["mc_config"]["assumption"]
         print("Assumption for Monte Carlo model: ", assumption)
 
         n_paths = self.params["mc_config"]["n_paths"]
+        pf_var = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
+        pf_es = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
+        dateindex = list(self.calib_drift.loc[startdate:enddate, :].index)
+
         if assumption == "gbm":
-            pf_var = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
-            pf_es = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
-            dateindex = list(self.calib_drift.loc[startdate:enddate,:].index)
+            pbool = True if pf_type in [1,3,4] else False
             for i in range(len(pf_var)):
-                pf_var[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_0,
+                pf_var[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, self.V_0,
                                       self.calib_vol.loc[dateindex[i], "portfolio"],
-                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pvar, stat='var')[1]
-                pf_es[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_0,
+                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pvar, longboolean = pbool, stat='var')[1]
+                pf_es[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, self.V_0,
                                       self.calib_vol.loc[dateindex[i], "portfolio"],
-                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, stat='es')[1]
+                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, longboolean = pbool, stat='es')[1]
             res_all["mc_VaR"] = pf_var
             res_all["mc_ES"] = pf_es
         else:
-            N = len(self.tickers)
+            if pf_type == 1:
+                tickers = data_params["stock_config"]["long_tickers"]
+                N = len(tickers)
+                # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
+                weight = [1 / N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
+                    "stock_config"]["long_custom_weight"]
+                V_each = self.V_0 * np.array(weight)
+                for i in range(len(pf_var)):
+                    cum_pl = np.full((1, n_paths), 0, dtype=np.float)
+                    for j in range(N):
+                        mu_j = self.calib_drift.loc[dateindex[i], tickers[j]]
+                        vol_j = self.calib_vol.loc[dateindex[i], tickers[j]]
+                        pl = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_each[j],
+                                          mu_j, vol_j, self.pvar, longboolean=True, stat='var')[0]
+                        cum_pl = cum_pl + pl
+                    pf_var[i] = np.percentile(cum_pl, 100 * self.pvar)
+                    threshold = np.percentile(cum_pl, 100 * self.pes)
+                    tail = cum_pl[cum_pl >= threshold]
+                    pf_es[i] = np.mean(tail)
 
-        self.param_result = res_all
+            elif pf_type == 2:
+                tickers = data_params["stock_config"]["short_tickers"]
+                N = len(tickers)
+                # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
+                weight = [1 / N] * N if data_params["stock_config"]["short_weight"] == "equal" else data_params[
+                    "stock_config"]["short_custom_weight"]
+                V_each = self.V_0 * np.array(weight)
+                for i in range(len(pf_var)):
+                    cum_pl = np.full((1, n_paths), 0, dtype=np.float)
+                    for j in range(N):
+                        mu_j = self.calib_drift.loc[startdate:enddate, tickers[j]]
+                        vol_j = self.calib_vol.loc[startdate:enddate, tickers[j]]
+                        pl = mc_var_es(self.dt, int(self.horizon / self.dt), n_paths, V_each,
+                                       mu_j, vol_j, self.pvar, longboolean=False, stat='var')[0]
+                        cum_pl = cum_pl + pl
+                    pf_var[i] = np.abs(np.percentile(cum_pl, 100 * (1-self.pvar)))
+                    threshold = np.percentile(cum_pl, 100 * (1-self.pes))
+                    tail = cum_pl[cum_pl <= threshold]
+                    pf_es[i] = np.abs(np.mean(tail))
+            elif pf_type == 3:
+                pass
+
+            res_all["mc_VaR"] = pf_var
+            res_all["mc_ES"] = pf_es
+
+        self.mc_result = res_all
 
         if self.plot_figure:
             plot_output(res_all, "Monte Carlo VaR and ES", 'mc_all')

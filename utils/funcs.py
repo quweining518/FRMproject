@@ -57,21 +57,42 @@ def correlation(cov, vol1, vol2, dt):
     corr = cov / (vol1 * vol2 * dt)
     return corr
 
-def mc_var_es(dt, T, n_paths, S0, vol, drift, p, stat='var'):
+def mc_var_es(dt, T, n_paths, S0, vol, drift, p, longboolean = True, stat='var'):
+    """
+    :param dt: the time step used (e.g: 1/252)
+    :param T: (integer) the length of time steps to simulate
+    :param n_paths: (integer) simulation paths
+    :param S0: the original price or portfolio value
+    :param vol: calibrated volatility for gbm
+    :param drift: calibrated drift for gbm
+    :param p: the percentile of threshold; the portfolio loss is less than threhold 100*p% of time
+    :param longboolean: long - True; short - False
+    :param stat: "var" or "es"
+    :return:
+    """
     paths = np.full((T, n_paths), np.nan, dtype=np.float)
     paths[0] = S0
     for i in range(T - 1):
         dW = np.sqrt(dt) * np.random.randn(n_paths)
         paths[i + 1] = paths[i] * np.exp((drift - 1 / 2 * vol ** 2) * dt + vol * dW)
 
-    pl = S0 - paths[-1]
+    pl = S0 - paths[-1] # pnl = V0 - VT
+    # For long portfolio, find the 100*p% percentile paths (or mean above for ES).
+    # For short portfolio, find the 100*(1-p)% paths (or below for ES).
     if stat == 'var':
-        result = - np.percentile(pl, 100 * (1 - p))
+        pp = p if longboolean else 1-p
+        result = np.abs(np.percentile(pl, 100 * pp))
     else:
-        threshold = np.percentile(pl, 100 * (1 - p))
-        tail = pl[pl <= threshold]
-        result = - np.mean(tail)
+        if longboolean:
+            threshold = np.percentile(pl, 100 * p)
+            tail = pl[pl >= threshold]
+            result = np.mean(tail)
+        else:
+            threshold = np.percentile(pl, 100 * (1-p))
+            tail = pl[pl <= threshold]
+            result = np.abs(np.mean(tail))
     return pl, result
+
 
 def rolling_weights(x, expo):
     expo = expo[:len(x)][::-1]  # reverse weight

@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # Initial model object
     sys_params = load_config("params")
     check_param_config(sys_params)
-    system = Model.varmodel(sys_params) # initialize the system
+    system = Model.varmodel(data_params, sys_params) # initialize the system
 
     if sys_params['param_model'] or sys_params['mc_model']:
         system.param_calibration(num_stock, stock_use, pf_use)
