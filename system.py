@@ -15,8 +15,7 @@ portfolio_type choices:
 1 - Stocks only + Long only
 2 - Stocks only + Short only
 3 - Stocks only + Long short
-4 - Stocks & Options + Long only
-5 - Stocks & Options + Long short
+4 - Stocks & Options
 
 """
 # portfolio_type = 1
@@ -29,9 +28,18 @@ portfolio_type choices:
 #
 # horizon = 5  # int (unit: day), default: 5 (5-day VaR/ES)
 # percentile = 0.99  # float (range (0,1)): percentile of
-#
-def setup(params):
-    tk_all = [params['stock_config']['tickers'], params['option_config']['tickers']]
+
+
+def setup(params, portfolio_type):
+    if portfolio_type == 1:
+        tk_all = [params['stock_config']['long_tickers'], []]
+    elif portfolio_type == 2:
+        tk_all = [params['stock_config']['short_tickers'], []]
+    elif portfolio_type == 3:
+        tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'], []]
+    else:
+        tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'],
+                  params['option_config']['tickers']]
     startstr = params['datastart']
     endstr = params['dataend']
 
@@ -53,24 +61,32 @@ if __name__ == '__main__':
     check_data_config(data_params)
     # a = yf.download(['BA', 'NOC', 'PFE', 'AAPL'], start='2002-01-01', end='2022-11-30')
     if data_params["portfolio_type"] in [1,2,3]:
-        stock_use, pf_use = setup(data_params)[:2]
+        stock_use, pf_use = setup(data_params, data_params["portfolio_type"])[:2]
     else:
-        stock_use, pf_use, option_use = setup(data_params)
+        stock_use, pf_use, option_use = setup(data_params, data_params["portfolio_type"])
+
 
     # Initial model object
     sys_params = load_config("params")
     check_param_config(sys_params)
     system = Model.varmodel(sys_params)
 
-    num_stock = len(data_params['stock_config']['tickers'])
-    print(num_stock)
+
+    pf_type = data_params["portfolio_type"]
+    print("Portfolio type is ", pf_type)
+    long_nstock = len(data_params['stock_config']['long_tickers'])
+    print("Number of stocks: ", long_nstock)
+    short_nstock = len(data_params['stock_config']['short_tickers'])
+    print("Number of stocks: ", short_nstock)
+    num_stock = long_nstock + short_nstock
+
     if sys_params['param_model'] or sys_params['mc_model']:
         system.param_calibration(num_stock, stock_use, pf_use)
         calibrated = True
         print("Calibration is done.")
     if sys_params['param_model'] and calibrated:
-        param_result = system.cal_param_var(data_params)
+        param_result = system.cal_param_var(pf_type, data_params)
     if sys_params['mc_model'] and calibrated:
-        mc_result = system.cal_mc_var(data_params)
+        mc_result = system.cal_mc_var(pf_type, data_params)
     if sys_params['hist_model']:
-        hist_result = system.cal_hist_var(data_params, pf_use['log_rtn'])
+        hist_result = system.cal_hist_var(pf_type, data_params, pf_use['log_rtn'])

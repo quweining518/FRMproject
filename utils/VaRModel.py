@@ -53,29 +53,88 @@ class varmodel(object):
             df_drift, df_vol = drift_vol(pf_handle['log_rtn'], pf_handle['log_rtn_sq'],
                                          dt, 0, lambd, type='equiv')
         all_drift["portfolio"], all_volatility["portfolio"] = df_drift, df_vol
-        self.calib_drift, self.calib_vol = all_drift, all_volatility
 
-    def cal_param_var(self, data_params):
+        cov_all = []
+        corr_all = []
+        if self.calib_weight == 1:
+            for i in range(N):
+                for j in range(i+1,N):
+                    cov = covariance(stock_handle.iloc[:,N+i], stock_handle.iloc[:,N+j], self.dt,
+                                     length, 0, type = "window")
+                    cov_all.append(cov)
+                    corr = correlation(cov, all_volatility.iloc[:,i], all_volatility.iloc[:,j], self.dt)
+                    corr_all.append(corr)
+        elif self.calib_weight == 2:
+            for i in range(N):
+                for j in range(i+1,N):
+                    cov = covariance(stock_handle.iloc[:,N+i], stock_handle.iloc[:,N+j], self.dt,
+                                     0, lambd, type = "equiv")
+                    cov_all.append(cov)
+                    corr = correlation(cov, all_volatility.iloc[:, i], all_volatility.iloc[:, j], self.dt)
+                    corr_all.append(corr)
+        covs = pd.concat(cov_all, axis=1)
+        covs.columns = [x for x in range(N*(N-1)//2)]
+        corrs = pd.concat(corr_all, axis=1)
+        corrs.columns = [x for x in range(N*(N-1)//2)]
+
+        self.calib_drift, self.calib_vol = all_drift, all_volatility
+        self.calib_cov = covs
+        self.calib_corr = corrs
+
+
+    def cal_param_var(self, pf_type, data_params):
         V_0 = data_params["total_position"]
         assumption = self.params["param_config"]["assumption"]
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['param_VaR', 'param_ES'])
         if assumption == "gbm":
-            res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
-                                       self.calib_drift.loc[startdate:enddate, "portfolio"],
-                                       self.calib_vol.loc[startdate:enddate, "portfolio"])
-            res_all["param_ES"] = param_es(V_0, self.horizon, self.pes,
-                                       self.calib_drift.loc[startdate:enddate, "portfolio"],
-                                       self.calib_vol.loc[startdate:enddate, "portfolio"])
-        else:
-            N = len(self.tickers)
-            P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
-            weight = [1/N] * N if data_params["stock_config"]["weight"] == "equal" else data_params["stock_config"]["custom_weight"]
-            V_each = V_0 * np.array(weight)
-            Q_0 = V_each / P_0
+            if pf_type == 1:
+                res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
+                                           self.calib_drift.loc[startdate:enddate, "portfolio"],
+                                           self.calib_vol.loc[startdate:enddate, "portfolio"])
+                res_all["param_ES"] = param_es(V_0, self.horizon, self.pes,
+                                           self.calib_drift.loc[startdate:enddate, "portfolio"],
+                                           self.calib_vol.loc[startdate:enddate, "portfolio"])
+            elif pf_type == 2:
+                res_all["param_VaR"] = var_short(V_0, self.horizon, self.pvar,
+                                                 self.calib_drift.loc[startdate:enddate, "portfolio"],
+                                                 self.calib_vol.loc[startdate:enddate, "portfolio"])
+                res_all["param_ES"] = es_short(V_0, self.horizon, self.pes,
+                                               self.calib_drift.loc[startdate:enddate, "portfolio"],
+                                               self.calib_vol.loc[startdate:enddate, "portfolio"])
+            elif pf_type == 3:
+                pass
 
-            z1 = 2.326
-            z2 = 1.96
+        else:
+            z_var = norm.ppf(self.pvar)
+            z_es = norm.ppf(self.pes)
+
+            if pf_type == 1:
+                tickers = data_params["stock_config"]["long_tickers"]
+                N = len(tickers)
+                P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
+                weight = [1/N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
+                                    "stock_config"]["long_custom_weight"]
+                V_each = V_0 * np.array(weight)
+
+                cum_evt = 0
+                cum_evt2 = 0
+                s = 0
+                for i in range(N):
+                    mu_i = self.calib_drift.loc[startdate:enddate, tickers[i]]
+                    vol_i = self.calib_vol.loc[startdate:enddate, tickers[i]]
+                    cum_evt += V_each[i] * np.exp(mu_i * self.horizon)
+                    cum_evt2 += V_each[i]**2 * np.exp((2*mu_i+vol_i**2) * self.horizon)
+                    for j in range(i+1, N):
+                        corr_ij = self.calib_corr[s]
+                        mu_j = self.calib_drift.loc[startdate:enddate, tickers[j]]
+                        vol_j = self.calib_vol.loc[startdate:enddate, tickers[j]]
+                        cum_evt2 += 2*V_each[i]*V_each[j]*np.exp((mu_i + mu_j + corr_ij*vol_j*vol_i) * self.horizon)
+                        s += 1
+
+                var_vt = cum_evt2 - cum_evt**2
+                res_all["param_VaR"] = V_0 - (cum_evt - z_var * np.sqrt(var_vt))
+                res_all["param_ES"] = V_0 - (cum_evt - np.sqrt(var_vt)/(1-self.pes) * np.exp(-z_es**2/2)/np.sqrt(2*np.pi))
 
         self.param_result = res_all
 
@@ -86,7 +145,7 @@ class varmodel(object):
                 res_all.to_excel(writer)
         return res_all
 
-    def cal_hist_var(self, data_params, pf_log_rtn):
+    def cal_hist_var(self, pf_type, data_params, pf_log_rtn):
         V_0 = data_params["total_position"]
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
@@ -101,7 +160,7 @@ class varmodel(object):
                 res_all.loc[startdate:enddate,:].to_excel(writer)
         return res_all
 
-    def cal_mc_var(self, data_params):
+    def cal_mc_var(self, pf_type, data_params):
         V_0 = data_params["total_position"]
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])

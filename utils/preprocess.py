@@ -80,12 +80,17 @@ def check_data_config(config):
         raise TypeError("Illegal input type.")
     if (config["option_weight"] < 0) or (config["option_weight"] > 1):
         raise ValueError("Option weight should be a float/int within range [0,1].")
-    if len(config["stock_config"]["tickers"]) <= 0:
+    if len(config["stock_config"]["long_tickers"]) <= 0:
         raise ValueError("Empty stock list.")
-    if config["stock_config"]["weight"] not in ['equal', 'custom']:
+    if config["stock_config"]["long_weight"] not in ['equal', 'custom']:
         raise ValueError("Acceptable field value are 'equal' and 'custom' only.")
-    pos_weight = [x for x in config["stock_config"]["custom_weight"] if x > 0]
-    neg_weight = [x for x in config["stock_config"]["custom_weight"] if x < 0]
+    if len(config["stock_config"]["short_tickers"]) <= 0:
+        raise ValueError("Empty stock list.")
+    if config["stock_config"]["short_weight"] not in ['equal', 'custom']:
+        raise ValueError("Acceptable field value are 'equal' and 'custom' only.")
+
+    pos_weight = config["stock_config"]["long_custom_weight"]
+    neg_weight = config["stock_config"]["short_custom_weight"]
     if len(pos_weight) > 0 and sum(pos_weight) != 1:
         raise ValueError("Sum of long portfolio weight should be 1.")
     if len(neg_weight) > 0 and sum(neg_weight) != 1:

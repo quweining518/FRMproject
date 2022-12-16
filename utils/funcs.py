@@ -35,24 +35,22 @@ def historical_es(df, notional, p, dt, window):
     df1 = df.rolling(window*int(1/dt)).apply(lambda x: cal_es(x))
     return - notional * df1
 
-def covariance(df1, df2, window, lambd, max_win=5000, type='window'):
+def covariance(rtn1, rtn2, dt, window, lambd, max_win=5000, type='window'):
     """calculate covariance between two stocks"""
     if type == 'window':
-        mean1 = df1['log_rtn'].rolling(min(max_win, 252 * window)).mean()
-        mean2 = df2['log_rtn'].rolling(min(max_win, 252 * window)).mean()
-        rtn12 = df1['log_rtn'] * df2['log_rtn']
-        cov = rtn12.rolling(min(max_win, 252 * window)).mean() - mean1 * mean2
+        mean1 = rtn1.rolling(min(max_win, int(1/dt) * window)).mean()
+        mean2 = rtn2.rolling(min(max_win, int(1/dt) * window)).mean()
+        rtn12 = rtn1 * rtn2
+        cov = rtn12.rolling(min(max_win, int(1/dt) * window)).mean() - mean1 * mean2
     else:
         expo = np.array([np.power(lambd, i) for i in range(max_win)])
-        mean1 = df1['log_rtn'].rolling(min_periods=1, window=max_win).apply(lambda x: rolling_weights(x, expo))
-        mean2 = df2['log_rtn'].rolling(min_periods=1, window=max_win).apply(lambda x: rolling_weights(x, expo))
-        norm_rtn1 = df1['log_rtn'] - mean1
-        norm_rtn2 = df2['log_rtn'] - mean2
+        mean1 = rtn1.rolling(min_periods=1, window=max_win).apply(lambda x: rolling_weights(x, expo))
+        mean2 = rtn2.rolling(min_periods=1, window=max_win).apply(lambda x: rolling_weights(x, expo))
+        norm_rtn1 = rtn1 - mean1
+        norm_rtn2 = rtn2 - mean2
         norm_rtn12 = norm_rtn1 * norm_rtn2
         cov = norm_rtn12.rolling(min_periods=1, window=max_win).apply(lambda x: rolling_weights(x, expo))
-
     return cov
-
 
 def correlation(cov, vol1, vol2, dt):
     """calculate correlation between two stocks"""

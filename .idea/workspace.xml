@@ -3,11 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="c33cb379-8505-4b42-a378-c3da5a54295b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/figure/parametric_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/parametric_all.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/result_parametric.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_parametric.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/system.py" beforeDir="false" afterPath="$PROJECT_DIR$/system.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/VaRModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/VaRModel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/funcs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/funcs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocess.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +48,9 @@
       <module name="Project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -78,7 +81,9 @@
       <workItem from="1670365134730" duration="7313000" />
       <workItem from="1670376936806" duration="34971000" />
       <workItem from="1670628827181" duration="7291000" />
-      <workItem from="1670964426879" duration="3854000" />
+      <workItem from="1670964426879" duration="4450000" />
+      <workItem from="1671130949719" duration="7776000" />
+      <workItem from="1671175483164" duration="2532000" />
     </task>
     <servers />
   </component>
@@ -98,15 +103,25 @@
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state x="157" y="0" key="SettingsEditor/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1670096256600" />
-    <state x="351" y="169" key="com.intellij.ide.util.TipDialog" timestamp="1670964426895">
+    <state x="351" y="169" key="com.intellij.ide.util.TipDialog" timestamp="1671175934523">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1670628830141" />
-    <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689@0.0.1280.689" timestamp="1670964426895" />
+    <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689@0.0.1280.689" timestamp="1671175934523" />
     <state x="303" y="10" width="672" height="678" key="search.everywhere.popup" timestamp="1670707153230">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1670096956310" />
     <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689@0.0.1280.689" timestamp="1670707153230" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/VaRModel.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
