@@ -6,9 +6,9 @@
 "total_position": 10000,
 "option_weight": 0,
 "stock_config": {
-		"long_tickers": ["BA", "NOC"],
+		"long_tickers": ["BA", "NOC", "JNJ", "PFE"],
 		"long_weight": "equal",
-		"long_custom_weight": [0.4,0.6],
+		"long_custom_weight": [0.2,0.3,0.4,0.1],
 		"short_tickers": ["JNJ", "PFE"],
 		"short_weight": "equal",
 		"short_custom_weight": [0.5,0.5]},

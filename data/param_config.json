@@ -1,7 +1,7 @@
 {
 "risk_config": {
 		"horizon": 5, 
-		"start": "2010-01-03",
+		"start": "2010-01-04",
 		"end": "2022-08-30",
 		"var_percentile": 0.99,
 		"es_percentile": 0.975},
@@ -18,4 +18,4 @@
 "mc_config": {"n_paths": 10000,
 		"assumption": "gbm"},
 "plot_figure": 1,
-"save_output": 1}
+"save_output": 0}

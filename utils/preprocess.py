@@ -70,7 +70,7 @@ def check_data_config(config):
             datetime.strptime(config["dataend"], "%Y-%m-%d")
         except:
             raise ValueError("Illegal input format or value.")
-    if config["portfolio_type"] not in [0,1]:
+    if config["portfolio_type"] not in [1,2,3,4]:
         raise ValueError("Illegal input type or value.")
     if not isinstance(config["total_position"], int) and not isinstance(config["total_position"], float):
         raise TypeError("Illegal input type.")
@@ -199,20 +199,21 @@ def load_data(tickers=None, startdate=None, enddate=None, use_history = False):
 
     return [df_stock, df_call, df_put]
 
-def stock_handle(df_price, params):
+def stock_handle(df_price, weights):
     log_return = lambda x: np.log(x/x.shift(1))
     log_return_sq = lambda ret: np.power(ret, 2)
 
     df_ret = df_price.apply(log_return)
     df_ret_sq = df_ret.apply(log_return_sq)
-    if params['stock_config']['weight'] == 'equal':
-        pf_ret = df_ret.sum(axis=1)/df_ret.shape[1]
+
+    # if params['stock_config']['weight'] == 'equal':
+    #     pf_ret = df_ret.sum(axis=1)/df_ret.shape[1]
+    #     pf_ret_sq = pf_ret.apply(log_return_sq)
+    # elif params['stock_config']['weight'] == 'custom':
+    weights = np.array(weights)
+    if np.sum(weights) == 1 or np.sum(weights) == 0:
+        pf_ret = df_ret.apply(lambda x: np.sum(x * weights), axis=1) / df_ret.shape[1]
         pf_ret_sq = pf_ret.apply(log_return_sq)
-    elif params['stock_config']['weight'] == 'custom':
-        weight = np.array(params['stock_config']['custom_weight'])
-        if np.sum(weight) == 1:
-            pf_ret = df_ret.apply(lambda x: np.sum(x * weight), axis=1) / df_ret.shape[1]
-            pf_ret_sq = pf_ret.apply(log_return_sq)
     else:
         raise ValueError("Weight scheme not acceptable.")
     df_handle = pd.concat([df_price, df_ret, df_ret_sq], axis = 1).dropna()

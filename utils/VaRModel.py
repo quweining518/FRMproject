@@ -85,8 +85,10 @@ class varmodel(object):
     def cal_param_var(self, pf_type, data_params):
         V_0 = data_params["total_position"]
         assumption = self.params["param_config"]["assumption"]
+        print("Assumption for parametric model: ", assumption)
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['param_VaR', 'param_ES'])
+
         if assumption == "gbm":
             if pf_type == 1:
                 res_all["param_VaR"] = param_var(V_0, self.horizon, self.pvar,
@@ -112,7 +114,7 @@ class varmodel(object):
             if pf_type == 1:
                 tickers = data_params["stock_config"]["long_tickers"]
                 N = len(tickers)
-                P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
+                # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
                 weight = [1/N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
                                     "stock_config"]["long_custom_weight"]
                 V_each = V_0 * np.array(weight)
@@ -164,13 +166,13 @@ class varmodel(object):
         V_0 = data_params["total_position"]
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])
-        assumption = self.params["param_config"]["assumption"]
+        assumption = self.params["mc_config"]["assumption"]
+        print("Assumption for Monte Carlo model: ", assumption)
+
         n_paths = self.params["mc_config"]["n_paths"]
         if assumption == "gbm":
             pf_var = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
             pf_es = np.zeros_like(self.calib_drift.loc[startdate:enddate, "portfolio"])
-            print(len(pf_var))
-            print(int(self.horizon/self.dt))
             dateindex = list(self.calib_drift.loc[startdate:enddate,:].index)
             for i in range(len(pf_var)):
                 pf_var[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_0,
