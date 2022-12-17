@@ -113,32 +113,38 @@ class varmodel(object):
         else:
             z_var = norm.ppf(self.pvar)
             z_es = norm.ppf(self.pes)
+            tickers = data_params["stock_config"]["long_tickers"] if pf_type == 1 else data_params["stock_config"]["short_tickers"]
+            N = len(tickers)
             if pf_type == 1:
-                tickers = data_params["stock_config"]["long_tickers"]
-                N = len(tickers)
-                # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
                 weight = [1/N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
+                        "stock_config"]["long_custom_weight"]
+            elif pf_type == 2:
+                weight = [1 / N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
                     "stock_config"]["long_custom_weight"]
-                V_each = self.V_0 * np.array(weight)
+            V_each = self.V_0 * np.array(weight)
 
-                cum_evt = 0
-                cum_evt2 = 0
-                s = 0
-                for i in range(N):
-                    mu_i = self.calib_drift.loc[startdate:enddate, tickers[i]]
-                    vol_i = self.calib_vol.loc[startdate:enddate, tickers[i]]
-                    cum_evt += V_each[i] * np.exp(mu_i * self.horizon)
-                    cum_evt2 += V_each[i]**2 * np.exp((2*mu_i+vol_i**2) * self.horizon)
-                    for j in range(i+1, N):
-                        corr_ij = self.calib_corr[s]
-                        mu_j = self.calib_drift.loc[startdate:enddate, tickers[j]]
-                        vol_j = self.calib_vol.loc[startdate:enddate, tickers[j]]
-                        cum_evt2 += 2*V_each[i]*V_each[j]*np.exp((mu_i + mu_j + corr_ij*vol_j*vol_i) * self.horizon)
-                        s += 1
-                var_vt = cum_evt2 - cum_evt**2
+            cum_evt = 0
+            cum_evt2 = 0
+            s = 0
+            for i in range(N):
+                mu_i = self.calib_drift.loc[startdate:enddate, tickers[i]]
+                vol_i = self.calib_vol.loc[startdate:enddate, tickers[i]]
+                cum_evt += V_each[i] * np.exp(mu_i * self.horizon)
+                cum_evt2 += V_each[i]**2 * np.exp((2*mu_i+vol_i**2) * self.horizon)
+                for j in range(i+1, N):
+                    corr_ij = self.calib_corr[s]
+                    mu_j = self.calib_drift.loc[startdate:enddate, tickers[j]]
+                    vol_j = self.calib_vol.loc[startdate:enddate, tickers[j]]
+                    cum_evt2 += 2*V_each[i]*V_each[j]*np.exp((mu_i + mu_j + corr_ij*vol_j*vol_i) * self.horizon)
+                    s += 1
+            var_vt = cum_evt2 - cum_evt**2
+            if pf_type == 1: # long only
                 res_all["param_VaR"] = self.V_0 - (cum_evt - z_var * np.sqrt(var_vt))
                 res_all["param_ES"] = self.V_0 - (cum_evt - np.sqrt(var_vt)/(1-self.pes) * np.exp(-z_es**2/2)/np.sqrt(2*np.pi))
-
+            elif pf_type == 2: # short only
+                res_all["param_VaR"] = - self.V_0 + (cum_evt + z_var * np.sqrt(var_vt))
+                res_all["param_ES"] = - self.V_0 + (
+                            cum_evt + np.sqrt(var_vt) / (1 - self.pes) * np.exp(-z_es ** 2 / 2) / np.sqrt(2 * np.pi))
         self.param_result = res_all
 
         if self.plot_figure:
@@ -151,8 +157,12 @@ class varmodel(object):
     def cal_hist_var(self, pf_type, data_params, pf_log_rtn):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
-        res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
-        res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
+        if pf_type == 1:
+            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
+            res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
+        elif pf_type == 2:
+            res_all["hist_VaR"] = historical_var(-pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
+            res_all["hist_ES"] = historical_es(-pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
         self.hist_result = res_all.loc[startdate:enddate,:]
 
         if self.plot_figure:

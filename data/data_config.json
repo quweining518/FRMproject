@@ -2,7 +2,7 @@
 "use_history": 0,
 "datastart": "2002-01-01",
 "dataend": "2022-11-30",
-"portfolio_type": 1,
+"portfolio_type": 2,
 "total_position": 10000,
 "option_weight": 0,
 "stock_config": {
