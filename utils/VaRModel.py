@@ -1,6 +1,5 @@
 from utils.funcs import *
 from datetime import datetime
-# from datetime import timedelta
 from scipy.stats import norm
 import warnings
 warnings.filterwarnings("ignore")
@@ -160,9 +159,10 @@ class varmodel(object):
     def cal_hist_var(self, pf_type, data_params, pf_log_rtn):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
+        hist_win = self.params['hist_window']
         if pf_type == 1:
-            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
-            res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
+            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, hist_win)
+            res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, hist_win)
         elif pf_type == 2:
             res_all["hist_VaR"] = historical_var(-pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
             res_all["hist_ES"] = historical_es(-pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
@@ -245,7 +245,7 @@ class varmodel(object):
 
             res_all["mc_VaR"] = pf_var
             res_all["mc_ES"] = pf_es
-
+            res_all.index = self.calib_drift.loc[startdate:enddate].index
         self.mc_result = res_all
 
         if self.plot_figure:
