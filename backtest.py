@@ -22,8 +22,8 @@ class BacktestCreator(object):
         curr_time1 = curr_time.strftime('%Y/%m/%d %H:%M:%s')
         print("Backtested at", curr_time1)
         curr_time2 = curr_time.strftime('%Y%m%d_%H%M')
-        self.path = os.path.join('./backtest', bt_name + "_" + curr_time2)
-        os.makedirs(os.path.join('./backtest', bt_name + "_" + curr_time2))
+        self.path = os.path.join('./backtest', bt_name + "_" + var_method + "_" + curr_time2)
+        os.makedirs(os.path.join('./backtest', bt_name + "_" + var_method + "_" + curr_time2))
 
     def get_risk_params(self, sys_params, data_params):
         risk_params = {}
