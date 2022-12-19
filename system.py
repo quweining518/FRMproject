@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore")
 
 
 def setup(params, portfolio_type):
+    data_params = params
     long_nstock = len(data_params['stock_config']['long_tickers'])
     short_nstock = len(data_params['stock_config']['short_tickers'])
     # 1: Long only portfolio
