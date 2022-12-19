@@ -18,33 +18,35 @@ percentile = 0.99  # float (range (0,1)): percentile of
 
 
 def setup(params, portfolio_type):
-    long_nstock = len(data_params['stock_config']['long_tickers'])
-    short_nstock = len(data_params['stock_config']['short_tickers'])
+    long_nstock = len(params['stock_config']['long_tickers'])
+    short_nstock = len(params['stock_config']['short_tickers'])
+
     # 1: Long only portfolio
     if portfolio_type == 1:
         tk_all = [params['stock_config']['long_tickers'], []]
         weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["long_weight"] == "equal" else \
-            data_params["stock_config"]["long_custom_weight"]
+            params["stock_config"]["long_custom_weight"]
         print(weights)
         num_stock = long_nstock
     # 2: Short only portfolio
     elif portfolio_type == 2:
         tk_all = [params['stock_config']['short_tickers'], []]
-        weights = [1 / len(tk_all[0])] * len(tk_all[0]) if data_params["stock_config"]["short_weight"] == "equal" else \
-            data_params["stock_config"]["short_custom_weight"]
+        weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["short_weight"] == "equal" else \
+            params["stock_config"]["short_custom_weight"]
         num_stock = short_nstock
-    # 3: Long-short portfolio
-    # (hedged portfolio: can only take one long and one short stock with equal weight, i.e: 10000 for long, 10000 for short)
-    elif portfolio_type == 3:
-        tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'], []]
-        weights = [0.5, -0.5]
-        num_stock = long_nstock + short_nstock
-    # 4: Long only stock + ATM put option for VaR reduction
+    # # 3: Long-short portfolio
+    # # (hedged portfolio: can only take one long and one short stock with equal weight, i.e: 10000 for long, 10000 for short)
+    # elif portfolio_type == 3:
+    #     tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'], []]
+    #     weights = [0.5, -0.5]
+    #     num_stock = long_nstock + short_nstock
+
+    # 3: Long only stock + ATM put option for VaR reduction
     else:
         tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'],
                   params['option_config']['tickers']]
-        weights = [1 / len(tk_all[0])] * len(tk_all[0]) if data_params["stock_config"]["short_weight"] == "equal" else \
-            data_params["stock_config"]["short_custom_weight"]
+        weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["short_weight"] == "equal" else \
+            params["stock_config"]["short_custom_weight"]
         num_stock = long_nstock
 
     startstr = params['datastart']
