@@ -1,6 +1,5 @@
 from utils.funcs import *
 from datetime import datetime
-# from datetime import timedelta
 from scipy.stats import norm
 import warnings
 warnings.filterwarnings("ignore")
@@ -57,37 +56,40 @@ class varmodel(object):
             df_drift, df_vol = drift_vol(pf_handle['log_rtn'], pf_handle['log_rtn_sq'],
                                          dt, 0, lambd, type='equiv')
         all_drift["portfolio"], all_volatility["portfolio"] = df_drift, df_vol
-
-        cov_all = []
-        corr_all = []
-        if self.calib_weight == 1:
-            for i in range(N):
-                for j in range(i+1,N):
-                    cov = covariance(stock_handle.iloc[:,N+i], stock_handle.iloc[:,N+j], self.dt,
-                                     length, 0, type = "window")
-                    cov_all.append(cov)
-                    corr = correlation(cov, all_volatility.iloc[:,i], all_volatility.iloc[:,j], self.dt)
-                    corr_all.append(corr)
-        elif self.calib_weight == 2:
-            for i in range(N):
-                for j in range(i+1,N):
-                    cov = covariance(stock_handle.iloc[:,N+i], stock_handle.iloc[:,N+j], self.dt,
-                                     0, lambd, type = "equiv")
-                    cov_all.append(cov)
-                    corr = correlation(cov, all_volatility.iloc[:, i], all_volatility.iloc[:, j], self.dt)
-                    corr_all.append(corr)
-        covs = pd.concat(cov_all, axis=1)
-        covs.columns = [x for x in range(N*(N-1)//2)]
-        corrs = pd.concat(corr_all, axis=1)
-        corrs.columns = [x for x in range(N*(N-1)//2)]
-
         self.calib_drift, self.calib_vol = all_drift, all_volatility
-        self.calib_cov = covs
-        self.calib_corr = corrs
+
+        if N > 1:
+            cov_all = []
+            corr_all = []
+            if self.calib_weight == 1:
+                for i in range(N):
+                    for j in range(i+1,N):
+                        cov = covariance(stock_handle.iloc[:,N+i], stock_handle.iloc[:,N+j], self.dt,
+                                         length, 0, type = "window")
+                        cov_all.append(cov)
+                        corr = correlation(cov, all_volatility.iloc[:,i], all_volatility.iloc[:,j], self.dt)
+                        corr_all.append(corr)
+            elif self.calib_weight == 2:
+                for i in range(N):
+                    for j in range(i+1,N):
+                        cov = covariance(stock_handle.iloc[:,N+i], stock_handle.iloc[:,N+j], self.dt,
+                                         0, lambd, type = "equiv")
+                        cov_all.append(cov)
+                        corr = correlation(cov, all_volatility.iloc[:, i], all_volatility.iloc[:, j], self.dt)
+                        corr_all.append(corr)
+            covs = pd.concat(cov_all, axis=1)
+            covs.columns = [x for x in range(N*(N-1)//2)]
+            corrs = pd.concat(corr_all, axis=1)
+            corrs.columns = [x for x in range(N*(N-1)//2)]
+            self.calib_cov = covs
+            self.calib_corr = corrs
 
 
     def cal_param_var(self, pf_type, data_params):
-        assumption = self.params["param_config"]["assumption"]
+        tickers = data_params["stock_config"]["long_tickers"] if pf_type == 1 else data_params["stock_config"][
+            "short_tickers"]
+        N = len(tickers)
+        assumption = self.params["param_config"]["assumption"] if N > 1 else "gbm"
         print("Assumption for parametric model: ", assumption)
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['param_VaR', 'param_ES'])
@@ -157,9 +159,10 @@ class varmodel(object):
     def cal_hist_var(self, pf_type, data_params, pf_log_rtn):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
+        hist_win = self.params['hist_window']
         if pf_type == 1:
-            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
-            res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
+            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, hist_win)
+            res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, hist_win)
         elif pf_type == 2:
             res_all["hist_VaR"] = historical_var(-pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
             res_all["hist_ES"] = historical_es(-pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
@@ -175,7 +178,9 @@ class varmodel(object):
     def cal_mc_var(self, pf_type, data_params):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])
-        assumption = self.params["mc_config"]["assumption"]
+        tickers = data_params["stock_config"]["long_tickers"]
+        N = len(tickers)
+        assumption = self.params["mc_config"]["assumption"] if N > 1 else 'gbm'
         print("Assumption for Monte Carlo model: ", assumption)
 
         n_paths = self.params["mc_config"]["n_paths"]
@@ -194,6 +199,7 @@ class varmodel(object):
                                       self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, longboolean = pbool, stat='es')[1]
             res_all["mc_VaR"] = pf_var
             res_all["mc_ES"] = pf_es
+            res_all.index = self.calib_drift.loc[startdate:enddate].index
         else:
             if pf_type == 1:
                 tickers = data_params["stock_config"]["long_tickers"]
@@ -239,7 +245,7 @@ class varmodel(object):
 
             res_all["mc_VaR"] = pf_var
             res_all["mc_ES"] = pf_es
-
+            res_all.index = self.calib_drift.loc[startdate:enddate].index
         self.mc_result = res_all
 
         if self.plot_figure:

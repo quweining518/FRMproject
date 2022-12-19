@@ -1,12 +1,8 @@
-import pandas as pd
 import numpy as np
-from datetime import datetime
-# from datetime import timedelta
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import warnings
 warnings.filterwarnings("ignore")
-import os
 
 def param_var(x, T, p, mu, vol):
     var = x - x*np.exp(vol*np.sqrt(T)*norm.ppf(1-p) + (mu-vol**2/2)*T)

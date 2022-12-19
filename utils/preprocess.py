@@ -1,4 +1,3 @@
-import datetime as dt
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
@@ -171,6 +170,7 @@ def load_data(tickers=None, startdate=None, enddate=None, use_history = False):
             all_stock = yf.download(tk_stock, start = startdate, end = enddate)
             df_stock = pd.DataFrame(all_stock.iloc[:,:len(tk_stock)].values,
                                     index = all_stock.index, columns= tk_stock)
+            print(df_stock.head())
         else:
             df_stock = None
 
@@ -205,14 +205,9 @@ def stock_handle(df_price, weights):
 
     df_ret = df_price.apply(log_return)
     df_ret_sq = df_ret.apply(log_return_sq)
-
-    # if params['stock_config']['weight'] == 'equal':
-    #     pf_ret = df_ret.sum(axis=1)/df_ret.shape[1]
-    #     pf_ret_sq = pf_ret.apply(log_return_sq)
-    # elif params['stock_config']['weight'] == 'custom':
     weights = np.array(weights)
     if np.sum(weights) == 1 or np.sum(weights) == 0:
-        pf_ret = df_ret.apply(lambda x: np.sum(x * weights), axis=1) / df_ret.shape[1]
+        pf_ret = df_ret.apply(lambda x: np.sum(x * weights), axis=1)
         pf_ret_sq = pf_ret.apply(log_return_sq)
     else:
         raise ValueError("Weight scheme not acceptable.")
@@ -226,6 +221,3 @@ def stock_handle(df_price, weights):
 
 def option_handle():
     pass
-
-#
-# stock, option = load_data(['AAPL', 'GM'], [1,2], '2022-01-01', '2022-11-30', use_history=False)

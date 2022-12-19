@@ -2,13 +2,13 @@
 "use_history": 0,
 "datastart": "2002-01-01",
 "dataend": "2022-11-30",
-"portfolio_type": 2,
+"portfolio_type": 1,
 "total_position": 10000,
 "option_weight": 0,
 "stock_config": {
-		"long_tickers": ["BA", "NOC", "JNJ", "PFE"],
+		"long_tickers": ["BA", "NOC"],
 		"long_weight": "equal",
-		"long_custom_weight": [0.2,0.3,0.4,0.1],
+		"long_custom_weight": [0.3,0.7],
 		"short_tickers": ["JNJ", "PFE"],
 		"short_weight": "equal",
 		"short_custom_weight": [0.5,0.5]},
@@ -17,3 +17,7 @@
 		"option_type": "put",
 		"moneyness": 1.0}
 }
+
+
+
+

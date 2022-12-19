@@ -1,24 +1,19 @@
 import pandas as pd
 import numpy as np
-from datetime import datetime
-from datetime import timedelta
-import matplotlib.pyplot as plt
-from scipy.stats import norm
 from utils.preprocess import *
-from utils.funcs import *
 import utils.VaRModel as Model
 import warnings
 warnings.filterwarnings("ignore")
 
 """
-# portfolio_type = 1
-# use_history = False
-# total_position = 10000  # int (unit: dollar), default: 10000
-# tickers = ['BA', 'NOC']
-# weight = 'equal'  # 'equal' or 'custom' (default: 'equal' and custom input will be ignored)
-# custom_weight = [0.4, 0.6] # long: positive float sum to 1; short: negative float sum to -1
-# horizon = 5  # int (unit: day), default: 5 (5-day VaR/ES)
-# percentile = 0.99  # float (range (0,1)): percentile of
+portfolio_type = 1
+use_history = False
+total_position = 10000  # int (unit: dollar), default: 10000
+tickers = ['BA', 'NOC']
+weight = 'equal'  # 'equal' or 'custom' (default: 'equal' and custom input will be ignored)
+custom_weight = [0.4, 0.6] # long: positive float sum to 1; short: negative float sum to -1
+horizon = 5  # int (unit: day), default: 5 (5-day VaR/ES)
+percentile = 0.99  # float (range (0,1)): percentile of
 """
 
 
@@ -30,6 +25,7 @@ def setup(params, portfolio_type):
         tk_all = [params['stock_config']['long_tickers'], []]
         weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["long_weight"] == "equal" else \
             data_params["stock_config"]["long_custom_weight"]
+        print(weights)
         num_stock = long_nstock
     # 2: Short only portfolio
     elif portfolio_type == 2:
