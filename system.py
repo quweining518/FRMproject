@@ -89,4 +89,4 @@ if __name__ == '__main__':
     if sys_params['mc_model'] and calibrated:
         mc_result = system.cal_mc_var(pf_type, data_params)
     if sys_params['hist_model']:
-        hist_result = system.cal_hist_var(pf_type, data_params, pf_use['log_rtn'])
+        hist_result = system.cal_hist_var(pf_type, pf_use['log_rtn'])

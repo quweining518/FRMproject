@@ -13,7 +13,8 @@ class varmodel(object):
 
         # system parameters initialization
         risk_config = sys_params['risk_config']
-        self.horizon = risk_config['horizon']/sys_params['tradedays']
+        self.horizon = risk_config['horizon']/sys_params['tradedays'] # horizon as a fraction of year
+        self.horizon_day = risk_config['horizon'] # horizon in day
         self.start = datetime.strptime(risk_config["start"], "%Y-%m-%d")
         self.end = datetime.strptime(risk_config["end"], "%Y-%m-%d")
         self.pvar = risk_config["var_percentile"]
@@ -156,20 +157,24 @@ class varmodel(object):
                 res_all.to_excel(writer)
         return res_all
 
-    def cal_hist_var(self, pf_type, data_params, pf_log_rtn):
+    def cal_hist_var(self, pf_type, pf_log_rtn):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns=['hist_VaR', 'hist_ES'])
         hist_win = self.params['hist_window']
         if pf_type == 1:
-            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.V_0, self.pvar, self.dt, hist_win)
-            res_all["hist_ES"] = historical_es(pf_log_rtn, self.V_0, self.pes, self.dt, hist_win)
+            res_all["hist_VaR"] = historical_var(pf_log_rtn, self.horizon_day, self.V_0,
+                                                 self.pvar, self.dt, hist_win)
+            res_all["hist_ES"] = historical_es(pf_log_rtn, self.horizon_day, self.V_0,
+                                               self.pes, self.dt, hist_win)
         elif pf_type == 2:
-            res_all["hist_VaR"] = historical_var(-pf_log_rtn, self.V_0, self.pvar, self.dt, self.calib_win)
-            res_all["hist_ES"] = historical_es(-pf_log_rtn, self.V_0, self.pes, self.dt, self.calib_win)
+            res_all["hist_VaR"] = historical_var(-pf_log_rtn, self.horizon_day, self.V_0,
+                                                 self.pvar, self.dt, self.calib_win)
+            res_all["hist_ES"] = historical_es(-pf_log_rtn, self.horizon_day, self.V_0,
+                                               self.pes, self.dt, self.calib_win)
         self.hist_result = res_all.loc[startdate:enddate,:]
 
         if self.plot_figure:
-            plot_output(res_all.loc[startdate:enddate,:], "Historical VaR and ES", 'historical_all')
+            plot_output(res_all.loc[startdate:enddate,:],"Historical VaR and ES",'historical_all')
         if self.save_output:
             with pd.ExcelWriter(r"./output/result_historical.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.loc[startdate:enddate,:].to_excel(writer)
@@ -178,9 +183,7 @@ class varmodel(object):
     def cal_mc_var(self, pf_type, data_params):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])
-        tickers = data_params["stock_config"]["long_tickers"]
-        N = len(tickers)
-        assumption = self.params["mc_config"]["assumption"] if N > 1 else 'gbm'
+        assumption = self.params["mc_config"]["assumption"]
         print("Assumption for Monte Carlo model: ", assumption)
 
         n_paths = self.params["mc_config"]["n_paths"]
@@ -191,10 +194,10 @@ class varmodel(object):
         if assumption == "gbm":
             pbool = True if pf_type in [1,3,4] else False
             for i in range(len(pf_var)):
-                pf_var[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, self.V_0,
+                pf_var[i] = mc_var_es(self.dt, self.horizon_day, n_paths, self.V_0,
                                       self.calib_vol.loc[dateindex[i], "portfolio"],
                                       self.calib_drift.loc[dateindex[i], "portfolio"], self.pvar, longboolean = pbool, stat='var')[1]
-                pf_es[i] = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, self.V_0,
+                pf_es[i] = mc_var_es(self.dt, self.horizon_day, n_paths, self.V_0,
                                       self.calib_vol.loc[dateindex[i], "portfolio"],
                                       self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, longboolean = pbool, stat='es')[1]
             res_all["mc_VaR"] = pf_var
@@ -204,7 +207,8 @@ class varmodel(object):
             if pf_type == 1:
                 tickers = data_params["stock_config"]["long_tickers"]
                 N = len(tickers)
-                # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
+                if N <= 1:
+                    raise ValueError("Cannot use normal distribution assumption when number of stocks is less than or equal to 1.")
                 weight = [1 / N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
                     "stock_config"]["long_custom_weight"]
                 V_each = self.V_0 * np.array(weight)
@@ -213,7 +217,7 @@ class varmodel(object):
                     for j in range(N):
                         mu_j = self.calib_drift.loc[dateindex[i], tickers[j]]
                         vol_j = self.calib_vol.loc[dateindex[i], tickers[j]]
-                        pl = mc_var_es(self.dt, int(self.horizon/self.dt), n_paths, V_each[j],
+                        pl = mc_var_es(self.dt, self.horizon_day, n_paths, V_each[j],
                                           mu_j, vol_j, self.pvar, longboolean=True, stat='var')[0]
                         cum_pl = cum_pl + pl
                     pf_var[i] = np.percentile(cum_pl, 100 * self.pvar)
@@ -224,6 +228,8 @@ class varmodel(object):
             elif pf_type == 2:
                 tickers = data_params["stock_config"]["short_tickers"]
                 N = len(tickers)
+                if N <= 1:
+                    raise ValueError("Cannot use normal distribution assumption when number of stocks is less than or equal to 1.")
                 # P_0 = self.stock_handle.loc[startdate, :].iloc[:N].values
                 weight = [1 / N] * N if data_params["stock_config"]["short_weight"] == "equal" else data_params[
                     "stock_config"]["short_custom_weight"]

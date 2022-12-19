@@ -18,17 +18,19 @@ def es_short(x, T, p, mu, vol):
 def var_short(x, T, p, mu, vol):
     return - param_var(x, T, 1-p, mu, vol)
 
-def historical_var(df, notional, p, dt, window):
-    df1 = df.rolling(window*int(1/dt)).apply(lambda x: np.percentile(x, 100*(1-p)))
+def historical_var(df, T, notional, p, dt, window):
+    df1 = df.rolling(T).sum()
+    df1 = df1.rolling(window*int(1/dt)).apply(lambda x: np.percentile(x, 100*(1-p)))
     return - notional * df1
 
-def historical_es(df, notional, p, dt, window):
+def historical_es(df, T, notional, p, dt, window):
     def cal_es(x):
         threshold = np.percentile(x, 100*(1-p))
         tail = x[x <= threshold]
         es = np.mean(tail)
         return es
-    df1 = df.rolling(window*int(1/dt)).apply(lambda x: cal_es(x))
+    df1 = df.rolling(T).sum()
+    df1 = df1.rolling(window*int(1/dt)).apply(lambda x: cal_es(x))
     return - notional * df1
 
 def covariance(rtn1, rtn2, dt, window, lambd, max_win=5000, type='window'):
@@ -53,6 +55,10 @@ def correlation(cov, vol1, vol2, dt):
     corr = cov / (vol1 * vol2 * dt)
     return corr
 
+# def get_corrgbm(dt, T, n_paths, S0, Mu, Vol, Coef_mat):
+#     R = np.linalg.cholesky(Coef_mat)
+
+
 def mc_var_es(dt, T, n_paths, S0, vol, drift, p, longboolean = True, stat='var'):
     """
     :param dt: the time step used (e.g: 1/252)
@@ -71,23 +77,26 @@ def mc_var_es(dt, T, n_paths, S0, vol, drift, p, longboolean = True, stat='var')
     for i in range(T - 1):
         dW = np.sqrt(dt) * np.random.randn(n_paths)
         paths[i + 1] = paths[i] * np.exp((drift - 1 / 2 * vol ** 2) * dt + vol * dW)
+    ST = paths[-1]
+    # For long portfolio, find the 100*(1-p)% percentile paths (or mean below for ES).
+    # For short portfolio, find the 100*p% paths (or mean above for ES).
 
-    pl = S0 - paths[-1] # pnl = V0 - VT
-    # For long portfolio, find the 100*p% percentile paths (or mean above for ES).
-    # For short portfolio, find the 100*(1-p)% paths (or below for ES).
     if stat == 'var':
         pp = p if longboolean else 1-p
-        result = np.abs(np.percentile(pl, 100 * pp))
+        result = np.abs(S0 - np.percentile(ST, 100 * (1-pp)))
+    # if stat == 'var':
+    #     pp = p if longboolean else 1-p
+    #     result = np.abs(np.percentile(pl, 100 * pp))
     else:
         if longboolean:
-            threshold = np.percentile(pl, 100 * p)
-            tail = pl[pl >= threshold]
-            result = np.mean(tail)
+            threshold = np.percentile(ST, 100 * (1-p))
+            tail = ST[ST <= threshold]
+            result = S0 - np.mean(tail)
         else:
-            threshold = np.percentile(pl, 100 * (1-p))
-            tail = pl[pl <= threshold]
-            result = np.abs(np.mean(tail))
-    return pl, result
+            threshold = np.percentile(ST, 100 * (p))
+            tail = ST[ST >= threshold]
+            result = np.abs(S0 - np.mean(tail))
+    return ST, result
 
 
 def rolling_weights(x, expo):
