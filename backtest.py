@@ -19,7 +19,7 @@ class BacktestCreator(object):
         self.var_method = var_method
         self.var_data = pd.DataFrame(var_data.iloc[:, 0])
         curr_time = datetime.now()
-        curr_time1 = curr_time.strftime('%Y/%m/%d %H:%M:%s')
+        curr_time1 = curr_time.strftime('%Y/%m/%d %H:%M')
         print("Backtested at", curr_time1)
         curr_time2 = curr_time.strftime('%Y%m%d_%H%M')
         self.path = os.path.join('./backtest', bt_name + "_" + var_method + "_" + curr_time2)
@@ -141,6 +141,7 @@ class BacktestCreator(object):
         self.var_data = var_data.filter(items=hist_data.index, axis=0)
         func = lambda x: datetime.utcfromtimestamp(x.tolist() / 1e9).date()
         self.index = [func(x) for x in self.var_data.index.values]
+        count = count.filter(items = hist_data.index, axis = 0)
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.plot(self.index, count.values.flatten(), lw=1, label="# of exceptions per year")
         ax.set_ylabel("# of counts")
@@ -183,7 +184,7 @@ class BacktestCreator(object):
         N = 252
         p = 1 - risk_params['VaR Percentile']
         num1 = [(p ** x) * ((1 - p) ** (252 - x)) for x in count_vals]
-        denom1 = [((1 - (x / 252)) ** (252 - x)) * ((x_py / 252) ** x_py) for x in count_vals]
+        denom1 = [((1 - (x / 252)) ** (252 - x)) * ((x / 252) ** x) for x in count_vals]
         LR_pof = [-2 * np.log(x / y) for x, y in zip(num1, denom1)]
         plt.figure()
         plt.plot(count.index, LR_pof, label='statistics')
@@ -228,7 +229,6 @@ if __name__ == '__main__':
 
     # Initial model object
     sys_params = load_config("params")
-    sys_params['plot_fiture'] = 0
     check_param_config(sys_params)
     system = Model.varmodel(data_params, sys_params) # initialize the system
 
@@ -241,16 +241,66 @@ if __name__ == '__main__':
     if sys_params['mc_model'] and calibrated:
         mc_result = system.cal_mc_var(pf_type, data_params)
     if sys_params['hist_model']:
-        hist_result = system.cal_hist_var(pf_type, data_params, pf_use['log_rtn'])
+        hist_result = system.cal_hist_var(pf_type, pf_use['log_rtn'])
 
-    backtest = BacktestCreator('test', mc_result, 'Parametric VaR')
-    risk_params = backtest.get_risk_params(sys_params, data_params)
-    backtest.get_port_losses()  # must go before get_exceptions for indices alignment
-    hist_data, var_data = backtest.return_data()
-    count = backtest.get_exceptions()
-    backtest.plot_exceptions(count)
-    tl_test = backtest.get_tl_test(count)
-    backtest.binomial(count)
-    backtest.POF(count)
-    reject99, reject95 = backtest.TUFF(count)
-    
+    """ Start of Backtest section """
+    test_name = 'short_5_1_win'
+    if sys_params["param_config"]["assumption"] == "gbm":
+        """run test 1,2,3"""
+        backtest = BacktestCreator(test_name, param_result, 'paramgbm')
+        risk_params = backtest.get_risk_params(sys_params, data_params)
+        backtest.get_port_losses()  # must go before get_exceptions for indices alignment
+        hist_data, var_data = backtest.return_data()
+        count = backtest.get_exceptions()
+        backtest.plot_exceptions(count)
+        tl_test = backtest.get_tl_test(count)
+        backtest.binomial(count)
+        backtest.POF(count)
+        reject99, reject95 = backtest.TUFF(count)
+        print('paramgbm:')
+        print(reject95, reject99)
+        print(tl_test)
+
+        backtest = BacktestCreator(test_name, hist_result, 'hist')
+        risk_params = backtest.get_risk_params(sys_params, data_params)
+        backtest.get_port_losses()  # must go before get_exceptions for indices alignment
+        hist_data, var_data = backtest.return_data()
+        count = backtest.get_exceptions()
+        backtest.plot_exceptions(count)
+        tl_test = backtest.get_tl_test(count)
+        backtest.binomial(count)
+        backtest.POF(count)
+        reject99, reject95 = backtest.TUFF(count)
+        print('historical:')
+        print(reject95, reject99)
+        print(tl_test)
+
+        backtest = BacktestCreator(test_name, mc_result, 'mcgbm')
+        risk_params = backtest.get_risk_params(sys_params, data_params)
+        backtest.get_port_losses()  # must go before get_exceptions for indices alignment
+        hist_data, var_data = backtest.return_data()
+        count = backtest.get_exceptions()
+        backtest.plot_exceptions(count)
+        tl_test = backtest.get_tl_test(count)
+        backtest.binomial(count)
+        backtest.POF(count)
+        reject99, reject95 = backtest.TUFF(count)
+        print('mcgbm:')
+        print(reject95, reject99)
+        print(tl_test)
+
+    else:
+        """run parametric normal assumption test only"""
+        backtest = BacktestCreator(test_name, param_result, 'paramnormal')
+        risk_params = backtest.get_risk_params(sys_params, data_params)
+        backtest.get_port_losses()  # must go before get_exceptions for indices alignment
+        hist_data, var_data = backtest.return_data()
+        count = backtest.get_exceptions()
+        backtest.plot_exceptions(count)
+        tl_test = backtest.get_tl_test(count)
+        backtest.binomial(count)
+        backtest.POF(count)
+        reject99, reject95 = backtest.TUFF(count)
+        print('paramnormal:')
+        print(reject95, reject99)
+        print(tl_test)

@@ -3,12 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="4aa67668-37b8-4947-a2e6-7b0615030ea5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/param_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/param_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/figure/historical_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/historical_all.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/figure/mc_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/mc_all.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/figure/parametric_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/parametric_all.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/system.py" beforeDir="false" afterPath="$PROJECT_DIR$/system.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/VaRModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/VaRModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/result_historical.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_historical.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/result_montecarlo.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_montecarlo.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/result_parametric.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_parametric.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/funcs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/funcs.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,7 +39,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.system">
+  <component name="RunManager" selected="Python.backtest">
     <configuration name="Unnamed" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -51,6 +54,25 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="backtest" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="Project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backtest.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -81,6 +103,7 @@
     <list>
       <item itemvalue="Python.Unnamed" />
       <item itemvalue="Python.system" />
+      <item itemvalue="Python.backtest" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -95,7 +118,7 @@
       <updated>1671213680922</updated>
       <workItem from="1671213684699" duration="13636000" />
       <workItem from="1671336899838" duration="3466000" />
-      <workItem from="1671417708241" duration="12077000" />
+      <workItem from="1671417708241" duration="18807000" />
     </task>
     <servers />
   </component>
@@ -103,10 +126,14 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1671467088058">
+    <state x="389" y="0" key="#backtest" timestamp="1671490033842">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
-    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.689@0.0.1280.689" timestamp="1671467088058" />
+    <state x="389" y="0" key="#backtest/0.0.1280.689@0.0.1280.689" timestamp="1671490033842" />
+    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1671490324970">
+      <screen x="0" y="0" width="1280" height="689" />
+    </state>
+    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.689@0.0.1280.689" timestamp="1671490324970" />
     <state x="389" y="0" key="#system" timestamp="1671213930771">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
@@ -124,10 +151,10 @@
     </state>
     <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1671336899861" />
     <state x="351" y="169" key="com.intellij.ide.util.TipDialog/0.0.1280.689@0.0.1280.689" timestamp="1671417712699" />
-    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup" timestamp="1671467294693">
+    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup" timestamp="1671490403987">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689/-1920.0.1920.1050@0.0.1280.689" timestamp="1671262669531" />
-    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689@0.0.1280.689" timestamp="1671467294693" />
+    <state x="303" y="10" width="672" height="678" key="search.everywhere.popup/0.0.1280.689@0.0.1280.689" timestamp="1671490403987" />
   </component>
 </project>
