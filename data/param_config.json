@@ -2,7 +2,7 @@
 "risk_config": {
 		"horizon": 5, 
 		"start": "2012-01-03",
-		"end": "2021-12-31",
+		"end": "2015-12-31",
 		"var_percentile": 0.95,
 		"es_percentile": 0.975},
 "tradedays": 252,

@@ -223,10 +223,10 @@ if __name__ == '__main__':
     check_data_config(data_params)
     pf_type = data_params["portfolio_type"]  # get portfolio type
     print("Portfolio type is ", pf_type)
-    if pf_type in [1,2,3]:
+    if pf_type in [1,2]:
         num_stock, stock_use, pf_use = setup(data_params, pf_type)[:3]
     else:
-        num_stock, stock_use, pf_use, option_use = setup(data_params, pf_type)
+        num_stock, stock_use, pf_use, im_vol = setup(data_params, pf_type)
 
     # Initial model object
     sys_params = load_config("params")
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     if sys_params['param_model'] and calibrated:
         param_result = system.cal_param_var(pf_type, data_params)
     if sys_params['mc_model'] and calibrated:
-        mc_result = system.cal_mc_var(pf_type, data_params)
+        mc_result = system.cal_mc_var(pf_type, stock_use, im_vol/100, data_params)
     if sys_params['hist_model']:
         hist_result = system.cal_hist_var(pf_type, pf_use['log_rtn'])
 

@@ -87,7 +87,7 @@ class varmodel(object):
 
 
     def cal_param_var(self, pf_type, data_params):
-        tickers = data_params["stock_config"]["long_tickers"] if pf_type == 1 else data_params["stock_config"][
+        tickers = data_params["stock_config"]["long_tickers"] if pf_type in [1,3] else data_params["stock_config"][
             "short_tickers"]
         N = len(tickers)
         assumption = self.params["param_config"]["assumption"] if N > 1 else "gbm"
@@ -118,12 +118,13 @@ class varmodel(object):
             z_es = norm.ppf(self.pes)
             tickers = data_params["stock_config"]["long_tickers"] if pf_type == 1 else data_params["stock_config"]["short_tickers"]
             N = len(tickers)
-            if pf_type == 1:
+            if pf_type in [1,3]:
                 weight = [1/N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
                         "stock_config"]["long_custom_weight"]
             elif pf_type == 2:
                 weight = [1 / N] * N if data_params["stock_config"]["long_weight"] == "equal" else data_params[
                     "stock_config"]["long_custom_weight"]
+
             V_each = self.V_0 * np.array(weight)
 
             cum_evt = 0
@@ -148,11 +149,13 @@ class varmodel(object):
                 res_all["param_VaR"] = - self.V_0 + (cum_evt + z_var * np.sqrt(var_vt))
                 res_all["param_ES"] = - self.V_0 + (
                             cum_evt + np.sqrt(var_vt) / (1 - self.pes) * np.exp(-z_es ** 2 / 2) / np.sqrt(2 * np.pi))
+            else:
+                pass
         self.param_result = res_all
 
-        if self.plot_figure:
+        if self.plot_figure and pf_type != 3:
             plot_output(res_all, "Parametric VaR and ES", 'parametric_all')
-        if self.save_output:
+        if self.save_output and pf_type != 3:
             with pd.ExcelWriter(r"./output/result_parametric.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.to_excel(writer)
         return res_all
@@ -171,16 +174,20 @@ class varmodel(object):
                                                  self.pvar, self.dt, self.calib_win)
             res_all["hist_ES"] = historical_es(-pf_log_rtn, self.horizon_day, self.V_0,
                                                self.pes, self.dt, self.calib_win)
+        else:
+            pass
+
         self.hist_result = res_all.loc[startdate:enddate,:]
 
-        if self.plot_figure:
+        if self.plot_figure and pf_type != 3:
             plot_output(res_all.loc[startdate:enddate,:],"Historical VaR and ES",'historical_all')
-        if self.save_output:
+        if self.save_output and pf_type != 3:
             with pd.ExcelWriter(r"./output/result_historical.xlsx", date_format="YYYY-MM-DD") as writer:
                 res_all.loc[startdate:enddate,:].to_excel(writer)
         return res_all
 
-    def cal_mc_var(self, pf_type, data_params):
+
+    def cal_mc_var(self, pf_type, stock_handle, im_vol, data_params):
         startdate, enddate = self.start, self.end
         res_all = pd.DataFrame(columns = ['mc_VaR', 'mc_ES'])
         assumption = self.params["mc_config"]["assumption"]
@@ -192,17 +199,33 @@ class varmodel(object):
         dateindex = list(self.calib_drift.loc[startdate:enddate, :].index)
 
         if assumption == "gbm":
-            pbool = True if pf_type in [1,3,4] else False
-            for i in range(len(pf_var)):
-                pf_var[i] = mc_var_es(self.dt, self.horizon_day, n_paths, self.V_0,
-                                      self.calib_vol.loc[dateindex[i], "portfolio"],
-                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pvar, longboolean = pbool, stat='var')[1]
-                pf_es[i] = mc_var_es(self.dt, self.horizon_day, n_paths, self.V_0,
-                                      self.calib_vol.loc[dateindex[i], "portfolio"],
-                                      self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, longboolean = pbool, stat='es')[1]
+            pbool = True if pf_type in [1,3] else False
+            if pf_type in [1,2]:
+                for i in range(len(pf_var)):
+                    pf_var[i] = mc_var_es(self.dt, self.horizon_day, n_paths, self.V_0,
+                                          self.calib_vol.loc[dateindex[i], "portfolio"],
+                                          self.calib_drift.loc[dateindex[i], "portfolio"], self.pvar, longboolean = pbool, stat='var')[1]
+                    pf_es[i] = mc_var_es(self.dt, self.horizon_day, n_paths, self.V_0,
+                                          self.calib_vol.loc[dateindex[i], "portfolio"],
+                                          self.calib_drift.loc[dateindex[i], "portfolio"], self.pes, longboolean = pbool, stat='es')[1]
+            else:
+                # option-stock mixed portfolio
+                stock_price = stock_handle.loc[dateindex]
+                stock_price = stock_price.iloc[:,0]
+                op_price = bs_price(stock_price.values, im_vol.loc[dateindex].values, data_params)
+                V_op = self.V_0 * data_params["option_weight"]
+                q_op = V_op/op_price
+                q_s = (self.V_0 - V_op) / stock_price
+                for i in range(len(pf_var)):
+                    pf_var[i] = mc_var_option(self.dt, self.horizon_day, n_paths, stock_price.loc[dateindex[i]],
+                                              self.calib_vol.loc[dateindex[i], "portfolio"], self.calib_drift.loc[dateindex[i], "portfolio"],
+                                              self.pvar, q_s[i], q_op[i], op_price[i])
+                    pf_es[i] = None
+
             res_all["mc_VaR"] = pf_var
             res_all["mc_ES"] = pf_es
-            res_all.index = self.calib_drift.loc[startdate:enddate].index
+            res_all.index = dateindex
+
         else:
             if pf_type == 1:
                 tickers = data_params["stock_config"]["long_tickers"]

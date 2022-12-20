@@ -26,7 +26,6 @@ def setup(params, portfolio_type):
         tk_all = [params['stock_config']['long_tickers'], []]
         weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["long_weight"] == "equal" else \
             params["stock_config"]["long_custom_weight"]
-        print(weights)
         num_stock = long_nstock
     # 2: Short only portfolio
     elif portfolio_type == 2:
@@ -34,33 +33,23 @@ def setup(params, portfolio_type):
         weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["short_weight"] == "equal" else \
             params["stock_config"]["short_custom_weight"]
         num_stock = short_nstock
-    # # 3: Long-short portfolio
-    # # (hedged portfolio: can only take one long and one short stock with equal weight, i.e: 10000 for long, 10000 for short)
-    # elif portfolio_type == 3:
-    #     tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'], []]
-    #     weights = [0.5, -0.5]
-    #     num_stock = long_nstock + short_nstock
-
     # 3: Long only stock + ATM put option for VaR reduction
     else:
-        tk_all = [params['stock_config']['long_tickers'], params['stock_config']['short_tickers'],
-                  params['option_config']['tickers']]
-        weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["short_weight"] == "equal" else \
-            params["stock_config"]["short_custom_weight"]
+        tk_all = [params['stock_config']['long_tickers'], params['option_config']['tickers']]
+        weights = [1 / len(tk_all[0])] * len(tk_all[0]) if params["stock_config"]["long_weight"] == "equal" else \
+            params["stock_config"]["long_custom_weight"]
         num_stock = long_nstock
 
     startstr = params['datastart']
     endstr = params['dataend']
 
     # load data
-    data = load_data(tk_all, startstr, endstr, params['use_history'])
-    stocks = data[0]
-    options = data[1:]
+    stocks = load_data(tk_all, startstr, endstr, params['use_history'])[0]
     stock_use, pf_use = stock_handle(stocks, weights)
-    option_use = None
-    # options_use = option_handle(options, params)
-    return num_stock, stock_use, pf_use, option_use
-
+    # option_use = option_handle(options, optype = params["option_config"]["option_type"])
+    if portfolio_type == 3:
+        imvol = pd.read_csv("./data/impliedvol.csv", index_col = 0, parse_dates=True).iloc[:,0]
+    return num_stock, stock_use, pf_use, imvol
 
 
 
@@ -70,10 +59,10 @@ if __name__ == '__main__':
     check_data_config(data_params)
     pf_type = data_params["portfolio_type"]  # get portfolio type
     print("Portfolio type is ", pf_type)
-    if pf_type in [1,2,3]:
+    if pf_type in [1,2]:
         num_stock, stock_use, pf_use = setup(data_params, pf_type)[:3]
     else:
-        num_stock, stock_use, pf_use, option_use = setup(data_params, pf_type)
+        num_stock, stock_use, pf_use, im_vol = setup(data_params, pf_type)
 
     # Initial model object
     sys_params = load_config("params")
@@ -87,6 +76,6 @@ if __name__ == '__main__':
     if sys_params['param_model'] and calibrated:
         param_result = system.cal_param_var(pf_type, data_params)
     if sys_params['mc_model'] and calibrated:
-        mc_result = system.cal_mc_var(pf_type, data_params)
+        mc_result = system.cal_mc_var(pf_type, stock_use, im_vol/100, data_params)
     if sys_params['hist_model']:
         hist_result = system.cal_hist_var(pf_type, pf_use['log_rtn'])

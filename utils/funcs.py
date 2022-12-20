@@ -99,54 +99,41 @@ def mc_var_es(dt, T, n_paths, S0, vol, drift, p, longboolean = True, stat='var')
     return ST, result
 
 
-def bs_price(S0, K, T, vol, r, optype='put'):
-    if optype == 'put':
-        sign = -1
-    else:
-        sign = 1
-    F = S0 * np.exp(r * T)
-    v = vol * np.sqrt(T)
-    d1 = np.log(F / K) / v + 0.5 * v
-    d2 = d1 - v
+def bs_price(stock_price, imvol, params, T=1, r=0.005):
+    optype = params["option_config"]["option_type"]
+    S0 = stock_price
+    sign = -1 if optype == 'put' else 1
 
-    price = sign * (F * norm.cdf(sign * d1) - K * norm.cdf(sign * d2)) * np.exp(-r * T)
+    F = S0 * np.exp(r * T)
+    v = imvol * np.sqrt(T)
+    d1 = np.log(F / S0) / v + 0.5 * v
+    d2 = d1 - v
+    price = sign * (F * norm.cdf(sign * d1) - S0 * norm.cdf(sign * d2)) * np.exp(-r * T)
     return price
 
-
-def mc_var_option(dt, T, n_paths, S0, vol, drift, p, qs, qop, px_op=60):
+def mc_var_option(dt, T, n_paths, S0, vol, mu, p, qs, qop, px_op=60):
     """Monte-Carlo VaR for a long stock and a put option.
 
-    Parameters
-    ----------
-    dt: scalar
-        The time steps of the simualtion
+    dt: scalar, The time steps of the simulation
     T: time distance to simulate
-    n_paths: int
-        the number of paths to simulate
-    S0: scalar
-        The spot price of the underlying security.
-    vol: scalar
-        annualized volatility.
-    mu: scalar
-        annualized drift
+    n_paths: int, the number of paths to simulate
+    S0: scalar, The original price of the underlying security.
+    vol: scalar, annualized volatility.
+    mu: scalar, annualized drift
     p: probability quantile
     qs: shares of stocks
     qop: shares of options
-
-
+    px_op: price of option at buying
     """
-    paths = np.full((T, n_paths), np.nan, dtype=np.float)
+    paths = np.full((T+1, n_paths), np.nan, dtype=np.float)
     paths[0] = S0
-
-    for i in range(T - 1):
+    for i in range(T):
         dW = np.sqrt(dt) * np.random.randn(n_paths)
         paths[i + 1] = paths[i] * np.exp((mu - 1 / 2 * vol ** 2) * dt + vol * dW)
-
     pl = (S0 - paths[-1]) * qs
     pl2 = (px_op - np.maximum(S0 - paths[-1], 0)) * qop
     result = np.percentile(pl - pl2, 100 * p)
-
-    return pl, result
+    return result
 
 
 def rolling_weights(x, expo):

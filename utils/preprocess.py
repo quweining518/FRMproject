@@ -218,6 +218,15 @@ def stock_handle(df_price, weights):
     print(pf_handle.head())
     return df_handle, pf_handle
 
+def bs_price(S0, K, T, vol, r, optype='put'):
+    if optype == 'put':
+        sign = -1
+    else:
+        sign = 1
+    F = S0 * np.exp(r * T)
+    v = vol * np.sqrt(T)
+    d1 = np.log(F / K) / v + 0.5 * v
+    d2 = d1 - v
 
-def option_handle():
-    pass
+    price = sign * (F * norm.cdf(sign * d1) - K * norm.cdf(sign * d2)) * np.exp(-r * T)
+    return price
