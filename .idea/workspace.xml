@@ -4,6 +4,30 @@
     <list default="true" id="4aa67668-37b8-4947-a2e6-7b0615030ea5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1858/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1858/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1858/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1902/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1902/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1902/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1858/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1858/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1858/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1903/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1903/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1903/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1858/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1858/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1858/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1902/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1902/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1902/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1900/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1900/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1900/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1905/POF_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1905/binomial_test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1905/exceptions.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data/data_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/param_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/param_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/figure/historical_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/historical_all.png" afterDir="false" />
@@ -12,6 +36,7 @@
       <change beforePath="$PROJECT_DIR$/output/result_historical.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_historical.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/result_montecarlo.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_montecarlo.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/result_parametric.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/output/result_parametric.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocess.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +142,7 @@
       <updated>1671213680922</updated>
       <workItem from="1671213684699" duration="13636000" />
       <workItem from="1671336899838" duration="3466000" />
-      <workItem from="1671417708241" duration="25285000" />
+      <workItem from="1671417708241" duration="26897000" />
     </task>
     <servers />
   </component>

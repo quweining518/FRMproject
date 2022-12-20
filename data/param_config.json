@@ -3,7 +3,7 @@
 		"horizon": 5, 
 		"start": "2012-01-03",
 		"end": "2021-12-31",
-		"var_percentile": 0.99,
+		"var_percentile": 0.95,
 		"es_percentile": 0.975},
 "tradedays": 252,
 "calib_window": 5,
@@ -11,7 +11,7 @@
 "calib_weighting": "unweighting",
 "param_model": 1,
 "param_config": {
-		"assumption": "gbm"},
+		"assumption": "normal"},
 "hist_model": 1,
 "hist_window": 1,
 "mc_model": 1,

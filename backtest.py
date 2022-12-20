@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
     ####################################################################################################################
     """ Start of Backtest section """
-    test_name = 'long_10_5d_5_win'
+    test_name = 'long_0.95_5_5d_5_win'
     if sys_params["param_config"]["assumption"] == "gbm":
         """run test 1,2,3"""
         backtest = BacktestCreator(test_name, param_result, 'paramgbm')

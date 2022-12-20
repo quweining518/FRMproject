@@ -90,9 +90,9 @@ def check_data_config(config):
 
     pos_weight = config["stock_config"]["long_custom_weight"]
     neg_weight = config["stock_config"]["short_custom_weight"]
-    if len(pos_weight) > 0 and sum(pos_weight) != 1:
+    if len(pos_weight) > 0 and sum(pos_weight) != 1.0:
         raise ValueError("Sum of long portfolio weight should be 1.")
-    if len(neg_weight) > 0 and sum(neg_weight) != 1:
+    if len(neg_weight) > 0 and sum(neg_weight) != 1.0:
         raise ValueError("Sum of short portfolio weight should be 1.")
     if len(config["option_config"]["tickers"]) > 0:
         if config["option_config"]["option_type"] not in ["call", "put"]:
