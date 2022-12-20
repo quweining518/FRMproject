@@ -1,17 +1,17 @@
 {
 "use_history": 0,
-"datastart": "2002-01-01",
+"datastart": "1990-01-01",
 "dataend": "2022-11-30",
-"portfolio_type": 1,
+"portfolio_type": 2,
 "total_position": 100000,
 "option_weight": 0,
 "stock_config": {
 		"long_tickers": ["BA","NOC","INTC","IBM","KWR"],
 		"long_weight": "equal",
 		"long_custom_weight": [0.1,0.2,0.3,0.2,0.2],
-		"short_tickers": ["JNJ"],
+		"short_tickers": ["BA","NOC","INTC","IBM","KWR"],
 		"short_weight": "equal",
-		"short_custom_weight": [1]},
+		"short_custom_weight": [0.1,0.2,0.3,0.2,0.2]},
 "option_config": {
 		"tickers": [],
 		"option_type": "put",
