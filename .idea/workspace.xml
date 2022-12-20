@@ -3,30 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4aa67668-37b8-4947-a2e6-7b0615030ea5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1835/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1835/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1835/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1839/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1839/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_hist_20221219_1839/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1835/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1835/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1835/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1839/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1839/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_mcgbm_20221219_1839/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1835/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1835/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1835/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1839/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1839/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramgbm_20221219_1839/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1837/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1837/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1837/exceptions.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1841/POF_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1841/binomial_test.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtest/short_5_1_win_paramnormal_20221219_1841/exceptions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/data_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/param_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/param_config.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/figure/historical_all.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/figure/historical_all.png" afterDir="false" />
@@ -140,7 +117,7 @@
       <updated>1671213680922</updated>
       <workItem from="1671213684699" duration="13636000" />
       <workItem from="1671336899838" duration="3466000" />
-      <workItem from="1671417708241" duration="19844000" />
+      <workItem from="1671417708241" duration="25285000" />
     </task>
     <servers />
   </component>

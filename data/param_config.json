@@ -1,17 +1,17 @@
 {
 "risk_config": {
-		"horizon": 1, 
-		"start": "2012-01-02",
+		"horizon": 5, 
+		"start": "2012-01-03",
 		"end": "2021-12-31",
 		"var_percentile": 0.99,
 		"es_percentile": 0.975},
 "tradedays": 252,
-"calib_window": 1,
-"calib_lambda": 0.9945,
-"calib_weighting": "exponential",
+"calib_window": 5,
+"calib_lambda": 0.9989,
+"calib_weighting": "unweighting",
 "param_model": 1,
 "param_config": {
-		"assumption": "normal"},
+		"assumption": "gbm"},
 "hist_model": 1,
 "hist_window": 1,
 "mc_model": 1,

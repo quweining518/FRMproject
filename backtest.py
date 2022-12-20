@@ -157,6 +157,7 @@ class BacktestCreator(object):
         plt.savefig(os.path.join(self.path, 'exceptions.png'))
 
     def get_tl_test(self, count):
+        count = count.values.flatten()
         res = dict()
         n = len(count)
         res['Backtest Window (yrs)'] = np.round(len(count) / 252, 2)
@@ -243,8 +244,9 @@ if __name__ == '__main__':
     if sys_params['hist_model']:
         hist_result = system.cal_hist_var(pf_type, pf_use['log_rtn'])
 
+    ####################################################################################################################
     """ Start of Backtest section """
-    test_name = 'short_5_1_win'
+    test_name = 'long_10_5d_5_win'
     if sys_params["param_config"]["assumption"] == "gbm":
         """run test 1,2,3"""
         backtest = BacktestCreator(test_name, param_result, 'paramgbm')
